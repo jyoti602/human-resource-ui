@@ -1,8 +1,11 @@
 import { useState } from "react";
+import AddEmployeeForm from "../../components/AddEmployeeForm";
 
 export default function Employees() {
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("All");
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState(null);
 
   const employeeData = [
     {
@@ -57,6 +60,35 @@ export default function Employees() {
       : "bg-red-100 text-red-700";
   };
 
+  const handleAddEmployee = (employeeData) => {
+    // Here you would typically make an API call to add the employee
+    console.log("Adding employee:", employeeData);
+    // For now, just log the data
+    alert(`Employee "${employeeData.name}" has been added successfully!`);
+  };
+
+  const handleEditEmployee = (employee) => {
+    setEditingEmployee(employee);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteEmployee = (employee) => {
+    if (window.confirm(`Are you sure you want to delete ${employee.name}?`)) {
+      console.log("Deleting employee:", employee);
+      alert(`Employee "${employee.name}" has been deleted!`);
+    }
+  };
+
+  const openAddForm = () => {
+    setEditingEmployee(null);
+    setIsFormOpen(true);
+  };
+
+  const closeForm = () => {
+    setIsFormOpen(false);
+    setEditingEmployee(null);
+  };
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-semibold mb-6">
@@ -88,7 +120,10 @@ export default function Employees() {
 
         </div>
 
-        <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
+        <button 
+          onClick={openAddForm}
+          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+        >
           + Add Employee
         </button>
       </div>
@@ -127,10 +162,16 @@ export default function Employees() {
                     </span>
                   </td>
                   <td className="px-6 py-4 space-x-2">
-                    <button className="text-blue-600 hover:underline">
+                    <button 
+                      onClick={() => handleEditEmployee(emp)}
+                      className="text-blue-600 hover:underline"
+                    >
                       Edit
                     </button>
-                    <button className="text-red-600 hover:underline">
+                    <button 
+                      onClick={() => handleDeleteEmployee(emp)}
+                      className="text-red-600 hover:underline"
+                    >
                       Delete
                     </button>
                   </td>
@@ -149,6 +190,14 @@ export default function Employees() {
           </tbody>
         </table>
       </div>
+
+      {/* Add/Edit Employee Form Modal */}
+      <AddEmployeeForm
+        isOpen={isFormOpen}
+        onClose={closeForm}
+        onSubmit={handleAddEmployee}
+        initialData={editingEmployee}
+      />
     </div>
   );
 }
