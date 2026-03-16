@@ -3,7 +3,6 @@ import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import Footer from "../components/Footer";
-import AIChatbot from "../components/AIChatbot";
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -40,9 +39,6 @@ export default function AdminLayout() {
 
       {/* Full Width Footer */}
       <Footer />
-
-      {/* AI Chatbot */}
-      <AIChatbot />
 
     </div>
   );

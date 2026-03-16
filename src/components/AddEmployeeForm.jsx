@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiX, FiUser, FiMail, FiBriefcase, FiHome, FiCheckCircle } from "react-icons/fi";
+import { FiX, FiUser, FiMail, FiBriefcase, FiHome, FiCheckCircle, FiDollarSign, FiCalendar } from "react-icons/fi";
 
 export default function AddEmployeeForm({ isOpen, onClose, onSubmit, initialData = null }) {
   const [formData, setFormData] = useState({
@@ -11,9 +11,10 @@ export default function AddEmployeeForm({ isOpen, onClose, onSubmit, initialData
   });
 
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const departments = ["IT", "HR", "Finance", "Marketing", "Sales", "Operations"];
-  const statuses = ["Active", "Inactive"];
+  const statuses = ["active", "inactive"];
 
   const validateForm = () => {
     const newErrors = {};
@@ -48,20 +49,27 @@ export default function AddEmployeeForm({ isOpen, onClose, onSubmit, initialData
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (validateForm()) {
-      onSubmit(formData);
-      onClose();
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        department: "",
-        position: "",
-        status: "Active",
-      });
+      setIsLoading(true);
+      try {
+        await onSubmit(formData);
+        onClose();
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          department: "",
+          position: "",
+          status: "Active",
+        });
+      } catch (error) {
+        console.error('Form submission error:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -211,13 +219,13 @@ export default function AddEmployeeForm({ isOpen, onClose, onSubmit, initialData
                     <input
                       type="radio"
                       name="status"
-                      value={status}
-                      checked={formData.status === status}
+                      value={status === "active" ? "Active" : "Inactive"}
+                      checked={formData.status === (status === "active" ? "Active" : "Inactive")}
                       onChange={handleChange}
                       className="mr-2 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-sm text-gray-700">
-                      {status}
+                    <span className="text-sm text-gray-700 capitalize">
+                      {status === "active" ? "Active" : "Inactive"}
                     </span>
                   </label>
                 ))}
@@ -232,15 +240,24 @@ export default function AddEmployeeForm({ isOpen, onClose, onSubmit, initialData
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                disabled={isLoading}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                disabled={isLoading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center"
               >
-                {initialData ? "Update Employee" : "Add Employee"}
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    {initialData ? "Updating..." : "Adding..."}
+                  </>
+                ) : (
+                  initialData ? "Update Employee" : "Add Employee"
+                )}
               </button>
             </div>
           </form>
