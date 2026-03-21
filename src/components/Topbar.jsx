@@ -67,8 +67,8 @@ export default function Topbar({ onMenuToggle }) {
         {/* Desktop Menu */}
         <div className="hidden lg:flex items-center space-x-4 xl:space-x-6 text-gray-700 font-medium">
 
-          <Link to="/" className="hover:text-green-600 transition-colors">Home</Link>
-          <Link to="/about" className="hover:text-green-600 transition-colors">About</Link>
+
+
 
           {/* Admin Dropdown */}
           <div className="relative group">
@@ -79,12 +79,12 @@ export default function Topbar({ onMenuToggle }) {
             <div className="absolute top-full left-0 w-56 bg-white border border-gray-200 rounded-lg shadow-lg py-2 
               invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
 
-              <Link to="/admin/dashboard" className="block px-4 py-2 hover:bg-gray-100 text-sm">Dashboard</Link>
-              <Link to="/admin/attendance" className="block px-4 py-2 hover:bg-gray-100 text-sm">Attendance</Link>
-              <Link to="/admin/employees" className="block px-4 py-2 hover:bg-gray-100 text-sm">Employees</Link>
-              <Link to="/admin/leaves" className="block px-4 py-2 hover:bg-gray-100 text-sm">Leaves</Link>
-              <Link to="/admin/payroll" className="block px-4 py-2 hover:bg-gray-100 text-sm">Payroll</Link>
-              <Link to="/admin/reports" className="block px-4 py-2 hover:bg-gray-100 text-sm">Reports</Link>
+    
+    
+    
+    
+    
+    
 
             </div>
           </div>
@@ -98,17 +98,17 @@ export default function Topbar({ onMenuToggle }) {
             <div className="absolute top-full left-0 w-56 bg-white border border-gray-200 rounded-lg shadow-lg py-2 
               invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
 
-              <Link to="/employee/dashboard" className="block px-4 py-2 hover:bg-gray-100 text-sm">Dashboard</Link>
-              <Link to="/employee/attendance" className="block px-4 py-2 hover:bg-gray-100 text-sm">Attendance</Link>
-              <Link to="/employee/applyleave" className="block px-4 py-2 hover:bg-gray-100 text-sm">Apply Leave</Link>
-              <Link to="/employee/salary" className="block px-4 py-2 hover:bg-gray-100 text-sm">Salary</Link>
-              <Link to="/employee/profile" className="block px-4 py-2 hover:bg-gray-100 text-sm">Profile</Link>
+    
+    
+    
+    
+    
 
             </div>
           </div>
 
-          <Link to="/features" className="hover:text-green-600 transition-colors">Features</Link>
-          <Link to="/contact" className="hover:text-green-600 transition-colors">Contact</Link>
+
+
 
         </div>
 
@@ -145,10 +145,10 @@ export default function Topbar({ onMenuToggle }) {
           </Link>
 
           <Link
-            to="/register"
+            to="/login"
             className="px-3 xl:px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
           >
-            Register
+            Employee Access
           </Link>
 
         </div>
@@ -344,11 +344,11 @@ export default function Topbar({ onMenuToggle }) {
               Login
             </Link>
             <Link 
-              to="/register" 
+              to="/login" 
               className="block w-full py-3 text-center bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
               onClick={toggleMenu}
             >
-              Register
+              Employee Access
             </Link>
           </div>
 

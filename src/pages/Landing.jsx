@@ -113,10 +113,10 @@ export default function Landing() {
         </h3>
 
         <Link
-          to="/register"
+          to="/login"
           className="bg-white text-indigo-600 px-10 py-4 rounded-full font-semibold shadow-lg hover:scale-105 transition"
         >
-          Start Free Trial
+          Employee Login
         </Link>
       </section>
 
