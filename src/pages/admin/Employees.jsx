@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import AddEmployeeForm from "../../components/AddEmployeeForm";
 import { employeeAPI, handleApiError } from "../../services/api";
+import { useToast } from "../../contexts/ToastContext";
 
 export default function Employees() {
+  const toast = useToast();
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("All");
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -53,12 +55,26 @@ export default function Employees() {
   const handleAddEmployee = async (employeeData) => {
     try {
       await employeeAPI.create(employeeData);
-      await fetchEmployees(); // Refresh the list
-      alert(`Employee "${employeeData.name}" has been added successfully!`);
+      await fetchEmployees();
+      toast.success(
+        `Employee "${employeeData.name}" has been added.\nUsername: ${employeeData.username}\nTemporary Password: ${employeeData.password}`
+      );
     } catch (error) {
       const errorMessage = handleApiError(error);
-      alert(`Failed to add employee: ${errorMessage}`);
-      throw error; // Re-throw to handle in form
+      toast.error(`Failed to add employee: ${errorMessage}`);
+      throw error;
+    }
+  };
+
+  const handleUpdateEmployee = async (employeeData) => {
+    try {
+      await employeeAPI.update(editingEmployee.id, employeeData);
+      await fetchEmployees();
+      toast.success(`Employee "${employeeData.name}" has been updated successfully!`);
+    } catch (error) {
+      const errorMessage = handleApiError(error);
+      toast.error(`Failed to update employee: ${errorMessage}`);
+      throw error;
     }
   };
 
@@ -72,10 +88,10 @@ export default function Employees() {
       try {
         await employeeAPI.delete(employee.id);
         await fetchEmployees(); // Refresh the list
-        alert(`Employee "${employee.name}" has been deleted!`);
+        toast.success(`Employee "${employee.name}" has been deleted!`);
       } catch (error) {
         const errorMessage = handleApiError(error);
-        alert(`Failed to delete employee: ${errorMessage}`);
+        toast.error(`Failed to delete employee: ${errorMessage}`);
       }
     }
   };
@@ -225,7 +241,7 @@ export default function Employees() {
       <AddEmployeeForm
         isOpen={isFormOpen}
         onClose={closeForm}
-        onSubmit={handleAddEmployee}
+        onSubmit={editingEmployee ? handleUpdateEmployee : handleAddEmployee}
         initialData={editingEmployee}
       />
     </div>

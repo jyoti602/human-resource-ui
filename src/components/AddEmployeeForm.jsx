@@ -1,263 +1,324 @@
-import { useState } from "react";
-import { FiX, FiUser, FiMail, FiBriefcase, FiHome, FiCheckCircle, FiDollarSign, FiCalendar } from "react-icons/fi";
+import { useEffect, useState } from "react";
+import { FiBriefcase, FiCalendar, FiCheckCircle, FiLock, FiMail, FiPhone, FiUser, FiUserPlus, FiX } from "react-icons/fi";
+
+const defaultFormData = {
+  name: "",
+  email: "",
+  phone: "",
+  department: "",
+  position: "",
+  joining_date: "",
+  status: "Active",
+  username: "",
+  password: "",
+};
 
 export default function AddEmployeeForm({ isOpen, onClose, onSubmit, initialData = null }) {
-  const [formData, setFormData] = useState({
-    name: initialData?.name || "",
-    email: initialData?.email || "",
-    department: initialData?.department || "",
-    position: initialData?.position || "",
-    status: initialData?.status || "Active",
-  });
-
+  const [formData, setFormData] = useState(defaultFormData);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  const isEditMode = Boolean(initialData);
   const departments = ["IT", "HR", "Finance", "Marketing", "Sales", "Operations"];
-  const statuses = ["active", "inactive"];
+  const statuses = ["Active", "Inactive"];
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    setFormData({
+      name: initialData?.name || "",
+      email: initialData?.email || "",
+      phone: initialData?.phone || "",
+      department: initialData?.department || "",
+      position: initialData?.position || "",
+      joining_date: initialData?.joining_date || "",
+      status: initialData?.status || "Active",
+      username: "",
+      password: "",
+    });
+    setErrors({});
+  }, [initialData, isOpen]);
 
   const validateForm = () => {
-    const newErrors = {};
+    const nextErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
+      nextErrors.name = "Name is required";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+      nextErrors.email = "Email is required";
     }
 
     if (!formData.department) {
-      newErrors.department = "Department is required";
+      nextErrors.department = "Department is required";
     }
 
     if (!formData.position.trim()) {
-      newErrors.position = "Position is required";
-    } else if (formData.position.trim().length < 2) {
-      newErrors.position = "Position must be at least 2 characters";
+      nextErrors.position = "Position is required";
     }
 
-    if (!formData.status) {
-      newErrors.status = "Status is required";
+    if (!isEditMode && !formData.username.trim()) {
+      nextErrors.username = "Username is required";
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (!isEditMode && !formData.password.trim()) {
+      nextErrors.password = "Temporary password is required";
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (validateForm()) {
-      setIsLoading(true);
-      try {
-        await onSubmit(formData);
-        onClose();
-        // Reset form
-        setFormData({
-          name: "",
-          email: "",
-          department: "",
-          position: "",
-          status: "Active",
-        });
-      } catch (error) {
-        console.error('Form submission error:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
-    // Clear error for this field when user starts typing
+
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ""
+        [name]: "",
       }));
     }
   };
 
-  if (!isOpen) return null;
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || null,
+        department: formData.department,
+        position: formData.position,
+        joining_date: formData.joining_date || null,
+        status: formData.status,
+      };
+
+      if (!isEditMode) {
+        payload.username = formData.username;
+        payload.password = formData.password;
+      }
+
+      if (isEditMode && formData.username.trim()) {
+        payload.username = formData.username;
+      }
+
+      if (isEditMode && formData.password.trim()) {
+        payload.password = formData.password;
+      }
+
+      await onSubmit(payload);
+      onClose();
+      setFormData(defaultFormData);
+    } catch (error) {
+      console.error("Employee form submission error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <>
-      {/* Overlay */}
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
 
-      {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div 
-          className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
-          onClick={(e) => e.stopPropagation()}
+        <div
+          className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white shadow-2xl"
+          onClick={(event) => event.stopPropagation()}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">
-              {initialData ? "Edit Employee" : "Add New Employee"}
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <FiX className="w-6 h-6" />
+          <div className="flex items-center justify-between border-b border-gray-200 p-6">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">
+                {isEditMode ? "Edit Employee" : "Add New Employee"}
+              </h2>
+              <p className="mt-1 text-sm text-gray-500">
+                {isEditMode
+                  ? "Update employee basics and optionally reset their login."
+                  : "Create the employee account now. They can complete their profile after login."}
+              </p>
+            </div>
+            <button onClick={onClose} className="text-gray-400 transition-colors hover:text-gray-600">
+              <FiX className="h-6 w-6" />
             </button>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Name Field */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <FiUser className="inline mr-2" />
-                Name
-              </label>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+            <Field
+              icon={<FiUser className="inline mr-2" />}
+              label="Full Name"
+              error={errors.name}
+            >
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Enter employee name"
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.name ? "border-red-500" : "border-gray-300"
-                }`}
+                className={inputClass(errors.name)}
               />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-              )}
-            </div>
+            </Field>
 
-            {/* Email Field */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <FiMail className="inline mr-2" />
-                Email
-              </label>
+            <Field
+              icon={<FiMail className="inline mr-2" />}
+              label="Email"
+              error={errors.email}
+            >
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Enter email address"
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                }`}
+                className={inputClass(errors.email)}
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-              )}
-            </div>
+            </Field>
 
-            {/* Department Field */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <FiHome className="inline mr-2" />
-                Department
-              </label>
+            <Field
+              icon={<FiBriefcase className="inline mr-2" />}
+              label="Department"
+              error={errors.department}
+            >
               <select
                 name="department"
                 value={formData.department}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.department ? "border-red-500" : "border-gray-300"
-                }`}
+                className={inputClass(errors.department)}
               >
                 <option value="">Select Department</option>
-                {departments.map(dept => (
-                  <option key={dept} value={dept}>{dept}</option>
+                {departments.map((department) => (
+                  <option key={department} value={department}>
+                    {department}
+                  </option>
                 ))}
               </select>
-              {errors.department && (
-                <p className="mt-1 text-sm text-red-600">{errors.department}</p>
-              )}
-            </div>
+            </Field>
 
-            {/* Position Field */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <FiBriefcase className="inline mr-2" />
-                Position
-              </label>
+            <Field
+              icon={<FiBriefcase className="inline mr-2" />}
+              label="Position"
+              error={errors.position}
+            >
               <input
                 type="text"
                 name="position"
                 value={formData.position}
                 onChange={handleChange}
                 placeholder="Enter job position"
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.position ? "border-red-500" : "border-gray-300"
-                }`}
+                className={inputClass(errors.position)}
               />
-              {errors.position && (
-                <p className="mt-1 text-sm text-red-600">{errors.position}</p>
-              )}
-            </div>
+            </Field>
 
-            {/* Status Field */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <FiCheckCircle className="inline mr-2" />
-                Status
-              </label>
-              <div className="flex space-x-4">
-                {statuses.map(status => (
-                  <label key={status} className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="status"
-                      value={status === "active" ? "Active" : "Inactive"}
-                      checked={formData.status === (status === "active" ? "Active" : "Inactive")}
-                      onChange={handleChange}
-                      className="mr-2 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700 capitalize">
-                      {status === "active" ? "Active" : "Inactive"}
-                    </span>
-                  </label>
+            <Field
+              icon={<FiPhone className="inline mr-2" />}
+              label="Phone"
+              error={errors.phone}
+            >
+              <input
+                type="text"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="Enter phone number"
+                className={inputClass(errors.phone)}
+              />
+            </Field>
+
+            <Field
+              icon={<FiCalendar className="inline mr-2" />}
+              label="Joining Date"
+              error={errors.joining_date}
+            >
+              <input
+                type="date"
+                name="joining_date"
+                value={formData.joining_date}
+                onChange={handleChange}
+                className={inputClass(errors.joining_date)}
+              />
+            </Field>
+
+            <Field
+              icon={<FiCheckCircle className="inline mr-2" />}
+              label="Status"
+              error={errors.status}
+            >
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className={inputClass(errors.status)}
+              >
+                {statuses.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
                 ))}
-              </div>
-              {errors.status && (
-                <p className="mt-1 text-sm text-red-600">{errors.status}</p>
-              )}
+              </select>
+            </Field>
+
+            <Field
+              icon={<FiUserPlus className="inline mr-2" />}
+              label={isEditMode ? "Username Reset" : "Login Username"}
+              error={errors.username}
+            >
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                placeholder={isEditMode ? "Optional new username" : "Create a username"}
+                className={inputClass(errors.username)}
+              />
+            </Field>
+
+            <div className="md:col-span-2">
+              <Field
+                icon={<FiLock className="inline mr-2" />}
+                label={isEditMode ? "Password Reset" : "Temporary Password"}
+                error={errors.password}
+              >
+                <input
+                  type="text"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder={isEditMode ? "Optional new password" : "Create a temporary password"}
+                  className={inputClass(errors.password)}
+                />
+              </Field>
             </div>
 
-            {/* Form Actions */}
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <div className="flex justify-end gap-3 border-t border-gray-200 pt-4 md:col-span-2">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isLoading}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                className="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center"
+                className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
               >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    {initialData ? "Updating..." : "Adding..."}
-                  </>
-                ) : (
-                  initialData ? "Update Employee" : "Add Employee"
-                )}
+                {isLoading ? (isEditMode ? "Updating..." : "Creating...") : (isEditMode ? "Update Employee" : "Create Employee")}
               </button>
             </div>
           </form>
@@ -265,4 +326,23 @@ export default function AddEmployeeForm({ isOpen, onClose, onSubmit, initialData
       </div>
     </>
   );
+}
+
+function Field({ label, icon, error, children }) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-medium text-gray-700">
+        {icon}
+        {label}
+      </label>
+      {children}
+      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+function inputClass(hasError) {
+  return `w-full rounded-lg border px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 ${
+    hasError ? "border-red-500" : "border-gray-300"
+  }`;
 }

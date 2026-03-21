@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useToast } from "../../contexts/ToastContext";
 
 export default function ApplyLeave() {
+  const toast = useToast();
   const [formData, setFormData] = useState({
     leaveType: "Casual Leave",
     fromDate: "",
@@ -58,7 +60,7 @@ export default function ApplyLeave() {
       reason: "",
     });
 
-    alert("Leave request submitted successfully!");
+    toast.success("Leave request submitted successfully!");
   };
 
   const getStatusColor = (status) => {

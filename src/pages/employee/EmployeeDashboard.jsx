@@ -1,18 +1,49 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { EmployeeOnly } from '../../components/RoleBasedAccess';
+import { useAuth } from '../../contexts/AuthContext';
 import { 
   FiUser, 
   FiCalendar, 
   FiDollarSign,
   FiClock,
   FiCheckCircle,
-  FiLogOut,
   FiFileText,
   FiSettings
 } from "react-icons/fi";
 import Card from "../../components/Card";
+import {
+  formatAttendanceDate,
+  getTodayAttendanceRecord,
+  hasMarkedAttendanceToday,
+  markAttendanceForToday,
+} from "../../utils/attendance";
 
 export default function EmployeeDashboard() {
+  const { user } = useAuth();
+  const [todayAttendance, setTodayAttendance] = useState(() => getTodayAttendanceRecord(user));
+  const [attendanceMessage, setAttendanceMessage] = useState("");
+  const isAttendanceMarked = hasMarkedAttendanceToday(user);
+  const checkInLabel = useMemo(() => {
+    if (!todayAttendance?.checkInTime) {
+      return "Not marked";
+    }
+
+    return new Date(todayAttendance.checkInTime).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }, [todayAttendance]);
+
+  const handleMarkAttendance = () => {
+    try {
+      const newRecord = markAttendanceForToday(user);
+      setTodayAttendance(newRecord);
+      setAttendanceMessage(`Attendance marked for ${formatAttendanceDate(newRecord.date)}.`);
+    } catch (error) {
+      setAttendanceMessage(error.message);
+    }
+  };
+
   return (
     <EmployeeOnly fallback={
       <div className="flex items-center justify-center min-h-screen">
@@ -81,7 +112,7 @@ export default function EmployeeDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Today</p>
-                <p className="text-2xl font-bold text-orange-600">9:00 AM</p>
+                <p className="text-2xl font-bold text-orange-600">{checkInLabel}</p>
                 <p className="text-xs text-gray-500">Check-in</p>
               </div>
               <div className="p-3 bg-orange-100 rounded-full">
@@ -96,10 +127,21 @@ export default function EmployeeDashboard() {
           <Card>
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
             <div className="space-y-3">
-              <button className="w-full text-left px-4 py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition flex items-center justify-between">
-                <span>Mark Attendance</span>
+              <button
+                onClick={handleMarkAttendance}
+                disabled={isAttendanceMarked}
+                className={`w-full text-left px-4 py-3 rounded-lg transition flex items-center justify-between ${
+                  isAttendanceMarked
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                }`}
+              >
+                <span>{isAttendanceMarked ? "Attendance Marked" : "Mark Attendance"}</span>
                 <FiClock className="w-5 h-5" />
               </button>
+              {attendanceMessage && (
+                <p className="text-sm text-gray-500">{attendanceMessage}</p>
+              )}
               <button className="w-full text-left px-4 py-3 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition flex items-center justify-between">
                 <span>Apply for Leave</span>
                 <FiCalendar className="w-5 h-5" />

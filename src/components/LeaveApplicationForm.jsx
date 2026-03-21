@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FiCalendar, FiUser, FiFileText, FiSend, FiX } from 'react-icons/fi';
+import { useToast } from '../contexts/ToastContext';
 
 const LeaveApplicationForm = ({ onClose, onSuccess }) => {
+  const toast = useToast();
   const [formData, setFormData] = useState({
     employee_id: '',
     employee_name: '',
@@ -144,7 +146,7 @@ const LeaveApplicationForm = ({ onClose, onSuccess }) => {
       });
 
       // Show success message
-      alert('Leave Request Submitted successfully!');
+      toast.success('Leave request submitted successfully!');
       
       // Call success callback
       if (onSuccess) {
@@ -158,7 +160,7 @@ const LeaveApplicationForm = ({ onClose, onSuccess }) => {
 
     } catch (error) {
       console.error('Error submitting leave request:', error);
-      alert(`Failed to submit leave request: ${error.message}`);
+      toast.error(`Failed to submit leave request: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }

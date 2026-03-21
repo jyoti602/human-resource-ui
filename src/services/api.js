@@ -20,11 +20,13 @@ const apiRequest = async (endpoint, options = {}) => {
   // Remove isFormData from config before passing to fetch
   delete config.isFormData;
 
-  // Temporarily disable authentication for testing
-  // const token = localStorage.getItem('token');
-  // if (token) {
-  //   config.headers.Authorization = `Bearer ${token}`;
-  // }
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${token}`,
+    };
+  }
 
   try {
     const response = await fetch(url, config);
@@ -44,9 +46,14 @@ const apiRequest = async (endpoint, options = {}) => {
 // Employee API functions
 export const employeeAPI = {
   getAll: () => apiRequest('/employees/'),
+  getMe: () => apiRequest('/employees/me'),
   getById: (id) => apiRequest(`/employees/${id}`),
   create: (data) => apiRequest('/employees/', {
     method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  updateMe: (data) => apiRequest('/employees/me', {
+    method: 'PUT',
     body: JSON.stringify(data),
   }),
   update: (id, data) => apiRequest(`/employees/${id}`, {
@@ -56,6 +63,33 @@ export const employeeAPI = {
   delete: (id) => apiRequest(`/employees/${id}`, {
     method: 'DELETE',
   }),
+};
+
+export const attendanceAPI = {
+  getAll: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiRequest(`/attendance/${queryString ? `?${queryString}` : ""}`);
+  },
+  getToday: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiRequest(`/attendance/today${queryString ? `?${queryString}` : ""}`);
+  },
+  checkIn: () =>
+    apiRequest("/attendance/check-in", {
+      method: "POST",
+    }),
+  lunchStart: () =>
+    apiRequest("/attendance/lunch-start", {
+      method: "POST",
+    }),
+  lunchEnd: () =>
+    apiRequest("/attendance/lunch-end", {
+      method: "POST",
+    }),
+  checkOut: () =>
+    apiRequest("/attendance/check-out", {
+      method: "POST",
+    }),
 };
 
 // Leave Request API functions
@@ -145,10 +179,16 @@ export const employeeRegistrationAPI = {
 
 // Authentication API functions
 export const authAPI = {
-  login: async (credentials) => {
-    return apiRequest('/api/auth/login', {
+  login: async ({ username, password }) => {
+    return apiRequest('/auth/login', {
       method: 'POST',
-      body: JSON.stringify(credentials),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        username,
+        password,
+      }).toString(),
     });
   },
 };

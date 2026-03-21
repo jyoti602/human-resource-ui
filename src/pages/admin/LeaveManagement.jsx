@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FiCalendar, FiUser, FiFileText, FiCheck, FiX, FiEye, FiFilter, FiSearch, FiPlus } from 'react-icons/fi';
 import LeaveApplicationForm from '../../components/LeaveApplicationForm';
+import { useToast } from '../../contexts/ToastContext';
 
 const LeaveManagement = () => {
+  const toast = useToast();
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,10 +69,10 @@ const LeaveManagement = () => {
       }
 
       await fetchLeaveRequests();
-      alert(`Leave request ${status} successfully!`);
+      toast.success(`Leave request ${status} successfully!`);
     } catch (error) {
       console.error('Error updating leave request:', error);
-      alert(`Failed to update leave request: ${error.message}`);
+      toast.error(`Failed to update leave request: ${error.message}`);
     }
   };
 

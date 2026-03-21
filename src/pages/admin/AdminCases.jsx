@@ -14,8 +14,10 @@ import {
   FiTrendingUp
 } from 'react-icons/fi';
 import Card from '../../components/Card';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function AdminCases() {
+  const toast = useToast();
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -133,10 +135,10 @@ export default function AdminCases() {
       setCases(cases.map(c => 
         c.id === caseId ? { ...c, status: 'approved' } : c
       ));
-      alert('Case approved successfully!');
+      toast.success('Case approved successfully!');
     } catch (error) {
       console.error('Error approving case:', error);
-      alert('Error approving case');
+      toast.error('Error approving case');
     }
   };
 
@@ -146,10 +148,10 @@ export default function AdminCases() {
       setCases(cases.map(c => 
         c.id === caseId ? { ...c, status: 'rejected' } : c
       ));
-      alert('Case rejected successfully!');
+      toast.success('Case rejected successfully!');
     } catch (error) {
       console.error('Error rejecting case:', error);
-      alert('Error rejecting case');
+      toast.error('Error rejecting case');
     }
   };
 

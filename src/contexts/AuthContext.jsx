@@ -30,12 +30,16 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
+    if (userData?.access_token) {
+      localStorage.setItem('token', userData.access_token);
+    }
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
   };
 

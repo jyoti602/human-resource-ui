@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { employeeRegistrationAPI } from "../services/api";
+import { authAPI } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import Topbar from "../components/Topbar";
 import Footer from "../components/Footer";
@@ -10,7 +10,7 @@ export default function Login() {
   const { login: authLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
@@ -31,7 +31,7 @@ export default function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!formData.email || !formData.password) {
+    if (!formData.username || !formData.password) {
       setError("Please fill in all fields");
       return;
     }
@@ -40,7 +40,7 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await employeeRegistrationAPI.login(formData.email, formData.password);
+      const response = await authAPI.login(formData);
 
       authLogin(response);
       navigate(response.role === "admin" ? "/admin/dashboard" : "/employee/dashboard");
@@ -48,10 +48,8 @@ export default function Login() {
       console.error("Login error:", requestError);
       const errorMessage = requestError.message || "Login failed";
 
-      if (errorMessage.includes("Invalid role")) {
-        setError(errorMessage);
-      } else if (errorMessage.includes("Invalid email or password")) {
-        setError("Invalid email or password");
+      if (errorMessage.includes("Incorrect username or password")) {
+        setError("Invalid username or password");
       } else {
         setError("Login failed. Please try again.");
       }
@@ -81,18 +79,18 @@ export default function Login() {
             )}
 
             <div>
-              <label htmlFor="email" className="mb-1 block text-sm text-gray-600">
-                Email
+              <label htmlFor="username" className="mb-1 block text-sm text-gray-600">
+                Username
               </label>
               <input
-                id="email"
-                type="email"
-                name="email"
-                value={formData.email}
+                id="username"
+                type="text"
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
-                placeholder="Enter your email"
+                placeholder="Enter your username"
                 className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-green-500"
-                autoComplete="email"
+                autoComplete="username"
               />
             </div>
 
@@ -134,7 +132,7 @@ export default function Login() {
             Employee records are created by an administrator.
           </p>
           <p className="mt-2 text-center text-sm text-gray-500">
-            Contact your HR admin if you need access.
+            Use your assigned username, not email, to sign in.
           </p>
         </div>
       </div>

@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useToast } from "../../contexts/ToastContext";
 
 export default function Salary() {
+  const toast = useToast();
   const [month, setMonth] = useState("March 2026");
 
   const salaryData = {
@@ -106,7 +108,7 @@ export default function Salary() {
         {/* Download Button */}
         <div className="mt-8 text-right">
           <button
-            onClick={() => alert("Payslip downloaded successfully!")}
+            onClick={() => toast.success("Payslip downloaded successfully!")}
             className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
           >
             Download Payslip
