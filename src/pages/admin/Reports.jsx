@@ -25,14 +25,8 @@ export default function Reports() {
   ];
 
   return (
-    <div className="p-6">
-
-      <h1 className="text-2xl font-semibold mb-6">
-        Reports & Analytics
-      </h1>
-
-      {/* Month Filter */}
-      <div className="mb-6">
+    <div className="space-y-6 p-6">
+      <div>
         <select
           value={month}
           onChange={(e) => setMonth(e.target.value)}
@@ -46,7 +40,7 @@ export default function Reports() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-4 gap-6">
         <div className="bg-white shadow-md rounded-xl p-5">
           <h2 className="text-gray-500 text-sm">Total Employees</h2>
           <p className="text-2xl font-bold text-green-600 mt-2">
@@ -77,7 +71,7 @@ export default function Reports() {
       </div>
 
       {/* Department Report */}
-      <div className="bg-white shadow-md rounded-xl p-6 mb-8">
+      <div className="bg-white shadow-md rounded-xl p-6">
         <h2 className="text-lg font-semibold mb-4">
           Department-wise Employees
         </h2>

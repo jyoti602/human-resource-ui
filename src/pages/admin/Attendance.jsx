@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { FiFilter, FiSearch } from "react-icons/fi";
 
 import { attendanceAPI, employeeAPI, handleApiError } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
@@ -56,36 +57,41 @@ export default function AdminAttendance() {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="mb-6 text-2xl font-semibold">Admin Attendance Management</h1>
+    <div className="space-y-4 p-4 sm:p-5 lg:p-6">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative w-full lg:max-w-md">
+          <FiSearch className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search employee..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          />
+        </div>
 
-      <div className="mb-4 flex items-center justify-between">
-        <input
-          type="text"
-          placeholder="Search employee..."
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          className="w-64 rounded-md border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
-
-        <select
-          value={filter}
-          onChange={(event) => setFilter(event.target.value)}
-          className="rounded-md border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-        >
-          <option value="All">All</option>
-          <option value="Present">Present</option>
-          <option value="Absent">Absent</option>
-          <option value="Late">Late</option>
-          <option value="Half Day">Half Day</option>
-        </select>
+        <div className="relative w-full lg:w-56">
+          <FiFilter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <select
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+            className="w-full appearance-none rounded-xl border border-slate-300 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          >
+            <option value="All">All</option>
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+            <option value="Late">Late</option>
+            <option value="Half Day">Half Day</option>
+          </select>
+        </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl bg-white shadow-md">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         {loading ? (
           <div className="py-8 text-center text-sm text-gray-500">Loading attendance...</div>
         ) : (
-          <table className="w-full text-left">
+          <div className="overflow-x-auto thin-scrollbar">
+            <table className="min-w-[980px] w-full text-left">
             <thead className="bg-gray-100 text-sm uppercase text-gray-600">
               <tr>
                 <th className="px-6 py-3">ID</th>
@@ -127,7 +133,8 @@ export default function AdminAttendance() {
                 </tr>
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
         )}
       </div>
     </div>

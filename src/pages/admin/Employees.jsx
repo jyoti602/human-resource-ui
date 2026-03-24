@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import AddEmployeeForm from "../../components/AddEmployeeForm";
+import Pagination from "../../components/Pagination";
 import { employeeAPI, handleApiError } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
 
 export default function Employees() {
+  const PAGE_SIZE = 8;
   const toast = useToast();
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("All");
@@ -12,6 +14,7 @@ export default function Employees() {
   const [employees, setEmployees] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch employees on component mount
   useEffect(() => {
@@ -45,6 +48,16 @@ export default function Employees() {
 
     return matchesSearch && matchesDepartment;
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, departmentFilter, employees.length]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredEmployees.length / PAGE_SIZE));
+  const paginatedEmployees = filteredEmployees.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   const getStatusColor = (status) => {
     return status === "Active"
@@ -110,130 +123,138 @@ export default function Employees() {
   const departments = [...new Set(employees.map(emp => emp.department))].filter(Boolean);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-6">
-        Employee Management
-      </h1>
+    <div className="space-y-6 p-3 sm:p-4 lg:p-5">
+      <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-5 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <input
+              type="text"
+              placeholder="Search employee..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+            />
 
-      {/* Search + Filter + Add Button */}
-      <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
-        <div className="flex gap-4">
+            <select
+              value={departmentFilter}
+              onChange={(e) => setDepartmentFilter(e.target.value)}
+              className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+            >
+              <option value="All">All Departments</option>
+              {departments.map((dept) => (
+                <option key={dept} value={dept}>{dept}</option>
+              ))}
+            </select>
+          </div>
 
-          <input
-            type="text"
-            placeholder="Search employee..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
-
-          <select
-            value={departmentFilter}
-            onChange={(e) => setDepartmentFilter(e.target.value)}
-            className="border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          <button
+            onClick={openAddForm}
+            className="inline-flex items-center justify-center self-start rounded-xl bg-blue-600 px-5 py-3 font-medium text-white transition hover:bg-blue-700 lg:self-auto"
           >
-            <option value="All">All Departments</option>
-            {departments.map(dept => (
-              <option key={dept} value={dept}>{dept}</option>
-            ))}
-          </select>
-
+            + Add Employee
+          </button>
         </div>
-
-        <button 
-          onClick={openAddForm}
-          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
-        >
-          + Add Employee
-        </button>
       </div>
 
-      {/* Error Message */}
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
           <strong>Error:</strong> {error}
           <button 
             onClick={fetchEmployees}
-            className="ml-4 text-red-600 underline hover:text-red-800"
+            className="ml-4 font-medium text-red-600 underline hover:text-red-800"
           >
             Retry
           </button>
         </div>
       )}
 
-      {/* Loading State */}
       {isLoading && (
-        <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-          <p className="mt-2 text-gray-600">Loading employees...</p>
+        <div className="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-b-2 border-green-600"></div>
+          <p className="mt-3 text-slate-600">Loading employees...</p>
         </div>
       )}
 
-      {/* Employees Table */}
       {!isLoading && (
-        <div className="bg-white shadow-md rounded-xl overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-gray-100 text-gray-600 uppercase text-sm">
-              <tr>
-                <th className="px-6 py-3">ID</th>
-                <th className="px-6 py-3">Name</th>
-                <th className="px-6 py-3">Email</th>
-                <th className="px-6 py-3">Department</th>
-                <th className="px-6 py-3">Position</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Actions</th>
-              </tr>
-            </thead>
+        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left">
+              <thead className="bg-slate-100 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                <tr>
+                  <th className="px-6 py-4">ID</th>
+                  <th className="px-6 py-4">Name</th>
+                  <th className="px-6 py-4">Email</th>
+                  <th className="px-6 py-4">Department</th>
+                  <th className="px-6 py-4">Position</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
 
-            <tbody className="divide-y">
-              {filteredEmployees.length > 0 ? (
-                filteredEmployees.map((emp) => (
-                  <tr key={emp.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">{emp.id}</td>
-                    <td className="px-6 py-4">{emp.name}</td>
-                    <td className="px-6 py-4">{emp.email}</td>
-                    <td className="px-6 py-4">{emp.department}</td>
-                    <td className="px-6 py-4">{emp.position}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                          emp.status
-                        )}`}
-                      >
-                        {emp.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 space-x-2">
-                      <button 
-                        onClick={() => handleEditEmployee(emp)}
-                        className="text-blue-600 hover:underline"
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteEmployee(emp)}
-                        className="text-red-600 hover:underline"
-                      >
-                        Delete
-                      </button>
+              <tbody className="divide-y divide-slate-100">
+                {filteredEmployees.length > 0 ? (
+                  paginatedEmployees.map((emp) => (
+                    <tr key={emp.id} className="align-top transition hover:bg-slate-50">
+                      <td className="whitespace-nowrap px-6 py-5 text-sm font-medium text-slate-700">{emp.id}</td>
+                      <td className="px-6 py-5 text-base font-medium text-slate-900">{emp.name}</td>
+                      <td className="px-6 py-5 text-sm text-slate-600">{emp.email}</td>
+                      <td className="px-6 py-5 text-sm text-slate-700">{emp.department}</td>
+                      <td className="px-6 py-5 text-sm text-slate-700">{emp.position}</td>
+                      <td className="px-6 py-5">
+                        <span
+                          className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${getStatusColor(
+                            emp.status
+                          )}`}
+                        >
+                          {emp.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="flex justify-end gap-3 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => handleEditEmployee(emp)}
+                            className="text-blue-600 transition hover:text-blue-700 hover:underline"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteEmployee(emp)}
+                            className="text-red-600 transition hover:text-red-700 hover:underline"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="7"
+                      className="px-6 py-10 text-center text-slate-500"
+                    >
+                      {employees.length === 0
+                        ? "No employees found. Add your first employee!"
+                        : "No employees match your search criteria."}
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="7"
-                    className="text-center py-6 text-gray-500"
-                  >
-                    {employees.length === 0 ? 
-                      "No employees found. Add your first employee!" : 
-                      "No employees match your search criteria."
-                    }
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {!isLoading && filteredEmployees.length > 0 && (
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={filteredEmployees.length}
+            pageSize={PAGE_SIZE}
+            itemLabel="employees"
+          />
         </div>
       )}
 

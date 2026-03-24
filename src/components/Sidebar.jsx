@@ -1,8 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
 import { 
   FiSettings, 
-  FiUser, 
+  FiUser,
   FiUsers, 
   FiCalendar, 
   FiFileText, 
@@ -11,19 +10,19 @@ import {
   FiEdit3, 
   FiHome 
 } from "react-icons/fi";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Sidebar({ role, isOpen, onClose }) {
-  const [adminOpen, setAdminOpen] = useState(true);
-  const [employeeOpen, setEmployeeOpen] = useState(true);
+  const { user } = useAuth();
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
+  const companyLabel = getCompanyLabel(user);
 
   const adminMenuItems = [
     { path: "/admin/dashboard", label: "Dashboard", icon: FiBarChart2 },
     { path: "/admin/employees", label: "Employees", icon: FiUsers },
     { path: "/admin/attendance", label: "Attendance", icon: FiCalendar },
-    { path: "/admin/leaves", label: "Leave Requests", icon: FiFileText },
     { path: "/admin/payroll", label: "Payroll", icon: FiDollarSign },
     { path: "/admin/reports", label: "Reports", icon: FiBarChart2 },
   ];
@@ -32,7 +31,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
     { path: "/employee/dashboard", label: "Dashboard", icon: FiBarChart2 },
     { path: "/employee/profile", label: "My Profile", icon: FiUser },
     { path: "/employee/attendance", label: "Attendance", icon: FiCalendar },
-    { path: "/employee/applyleave", label: "Apply Leave", icon: FiEdit3 },
+    { path: "/employee/applyleave", label: "Leave", icon: FiEdit3 },
     { path: "/employee/salary", label: "Salary", icon: FiDollarSign },
   ];
 
@@ -41,34 +40,38 @@ export default function Sidebar({ role, isOpen, onClose }) {
       {/* Mobile Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-[2px] lg:hidden"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50 
-        w-64 xl:w-72 
-        bg-gradient-to-b from-blue-600 to-blue-800 
-        text-white 
+        fixed inset-y-0 left-0 z-50 
+        lg:sticky lg:top-0 lg:self-start
+        w-[18rem] sm:w-[19rem] lg:w-60 xl:w-64
+        bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)]
+        text-slate-900
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        h-full lg:h-auto
+        h-full lg:h-screen
         flex flex-col
+        border-r border-slate-200/80 shadow-[18px_0_50px_rgba(15,23,42,0.08)]
       `}>
 
         {/* Header */}
-        <div className="p-4 lg:p-6 border-b border-blue-500">
+        <div className="border-b border-slate-200/80 p-4 lg:p-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg lg:text-xl font-bold flex items-center">
-              <FiSettings className="mr-2 text-xl" />
-              {role === "admin" ? "Admin Panel" : "Employee Panel"}
-            </h2>
+            <div>
+              <h2 className="flex items-center text-base font-semibold tracking-tight lg:text-lg">
+                <FiSettings className="mr-2 text-lg" />
+                {companyLabel}
+              </h2>
+            </div>
             {/* Mobile Close Button */}
             <button
               onClick={onClose}
-              className="lg:hidden p-2 rounded-md hover:bg-blue-700 transition-colors"
+              className="rounded-xl p-2 transition-colors hover:bg-slate-100 lg:hidden"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -78,30 +81,12 @@ export default function Sidebar({ role, isOpen, onClose }) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 lg:p-6 space-y-6 overflow-y-auto">
+        <nav className="flex-1 space-y-5 overflow-y-auto p-3 lg:p-4">
 
           {/* Admin Menu */}
           {role === "admin" && (
-            <div className="space-y-2">
-              <button
-                onClick={() => setAdminOpen(!adminOpen)}
-                className="w-full text-left font-semibold hover:bg-blue-700 p-3 rounded-lg transition-all duration-200 flex items-center justify-between group"
-              >
-                <span className="flex items-center">
-                  <FiUser className="mr-2" />
-                  Admin Menu
-                </span>
-                <svg 
-                  className={`w-4 h-4 transition-transform duration-200 ${adminOpen ? 'rotate-180' : ''}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              <div className={`space-y-1 transition-all duration-300 ${adminOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+            <div className="space-y-3">
+              <div className="space-y-1">
                 {adminMenuItems.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -109,85 +94,121 @@ export default function Sidebar({ role, isOpen, onClose }) {
                       key={item.path}
                       to={item.path}
                       onClick={onClose}
-                      className={`
-                        flex items-center p-3 rounded-lg transition-all duration-200
-                        ${isActive(item.path) 
-                          ? 'bg-blue-700 text-white shadow-md' 
-                          : 'hover:bg-blue-700 text-blue-100 hover:text-white'
-                        }
-                      `}
+                      className={`flex items-center rounded-2xl p-3 transition-all duration-200 ${
+                        isActive(item.path)
+                          ? "bg-blue-600 text-white shadow-[0_12px_28px_rgba(37,99,235,0.24)]"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      }`}
                     >
-                      <Icon className="mr-3 text-lg" />
+                      <Icon className="mr-3 text-base" />
                       <span className="font-medium">{item.label}</span>
                       {isActive(item.path) && (
-                        <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>
+                        <div className="ml-auto h-2 w-2 rounded-full bg-emerald-300"></div>
                       )}
                     </Link>
                   );
                 })}
+              </div>
+
+              <div className="space-y-2 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-2">
+                <div className="flex items-center gap-2 px-1 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  <FiFileText className="h-3.5 w-3.5" />
+                  Leave Management
+                </div>
+                <div className="space-y-1">
+                  <SidebarSubLink
+                    to="/admin/leaves?tab=requests"
+                    active={isLeaveTabActive(location.pathname, location.search, "requests")}
+                    label="Leave Requests"
+                  />
+                  <SidebarSubLink
+                    to="/admin/leaves?tab=types"
+                    active={isLeaveTabActive(location.pathname, location.search, "types")}
+                    label="Leave Types"
+                  />
+                </div>
               </div>
             </div>
           )}
 
           {/* Employee Menu */}
           {role === "employee" && (
-            <div className="space-y-2">
-              <button
-                onClick={() => setEmployeeOpen(!employeeOpen)}
-                className="w-full text-left font-semibold hover:bg-blue-700 p-3 rounded-lg transition-all duration-200 flex items-center justify-between group"
-              >
-                <span className="flex items-center">
-                  <FiUser className="mr-2" />
-                  Employee Menu
-                </span>
-                <svg 
-                  className={`w-4 h-4 transition-transform duration-200 ${employeeOpen ? 'rotate-180' : ''}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              <div className={`space-y-1 transition-all duration-300 ${employeeOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-                {employeeMenuItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={onClose}
-                      className={`
-                        flex items-center p-3 rounded-lg transition-all duration-200
-                        ${isActive(item.path) 
-                          ? 'bg-blue-700 text-white shadow-md' 
-                          : 'hover:bg-blue-700 text-blue-100 hover:text-white'
-                        }
-                      `}
-                    >
-                      <Icon className="mr-3 text-lg" />
-                      <span className="font-medium">{item.label}</span>
-                      {isActive(item.path) && (
-                        <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
+            <div className="space-y-1">
+              {employeeMenuItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={onClose}
+                    className={`flex items-center rounded-2xl p-3 transition-all duration-200 ${
+                      isActive(item.path)
+                        ? "bg-blue-600 text-white shadow-[0_12px_28px_rgba(37,99,235,0.24)]"
+                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    }`}
+                  >
+                    <Icon className="mr-3 text-base" />
+                    <span className="font-medium">{item.label}</span>
+                    {isActive(item.path) && (
+                      <div className="ml-auto h-2 w-2 rounded-full bg-emerald-300"></div>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           )}
 
         </nav>
 
         {/* Footer */}
-        <div className="p-4 lg:p-6 border-t border-blue-500">
-          <div className="text-xs lg:text-sm text-blue-200 text-center">
+        <div className="border-t border-slate-200/80 p-4 lg:p-5">
+          <div className="text-center text-xs text-slate-400">
             
           </div>
         </div>
 
       </aside>
     </>
+  );
+}
+
+function getCompanyLabel(user) {
+  if (user?.company_name) {
+    return user.company_name;
+  }
+
+  if (user?.tenant_slug) {
+    return user.tenant_slug
+      .split("-")
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+  }
+
+  return "Company";
+}
+
+function isLeaveTabActive(pathname, search, tab) {
+  if (pathname !== "/admin/leaves") {
+    return false;
+  }
+
+  const params = new URLSearchParams(search);
+  return (params.get("tab") || "requests") === tab;
+}
+
+function SidebarSubLink({ to, active, label }) {
+  return (
+    <Link
+      to={to}
+      className={`flex items-center rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 ${
+        active
+          ? "bg-blue-600 text-white shadow-[0_12px_28px_rgba(37,99,235,0.24)]"
+          : "text-slate-600 hover:bg-white hover:text-slate-900"
+      }`}
+    >
+      <span className="ml-6">{label}</span>
+      {active && <div className="ml-auto h-2 w-2 rounded-full bg-emerald-300" />}
+    </Link>
   );
 }

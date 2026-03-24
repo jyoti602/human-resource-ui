@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { FiSearch } from "react-icons/fi";
 
 import { attendanceAPI, handleApiError } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
@@ -139,10 +140,8 @@ export default function Attendance() {
   const canCheckOut = Boolean(todayRecord?.check_in) && !todayRecord?.check_out;
 
   return (
-    <div className="p-6">
-      <h1 className="mb-6 text-2xl font-semibold">My Attendance</h1>
-
-      <div className="mb-6 rounded-xl bg-white p-5 shadow-md">
+    <div className="space-y-6 p-6">
+      <div className="rounded-xl bg-white p-5 shadow-md">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-gray-800">Today's Attendance</h2>
@@ -213,18 +212,21 @@ export default function Attendance() {
       </div>
 
       <div className="mb-6 flex flex-col gap-4 md:flex-row">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-          placeholder="Search by date, time, or status"
-          className="rounded-md border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 md:min-w-[280px]"
-        />
+        <div className="relative w-full md:min-w-[280px]">
+          <FiSearch className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Search by date, time, or status"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 pl-9 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          />
+        </div>
 
         <select
           value={statusFilter}
           onChange={(event) => setStatusFilter(event.target.value)}
-          className="rounded-md border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
         >
           <option value="All">All Status</option>
           <option value="Present">Present</option>
@@ -241,51 +243,53 @@ export default function Attendance() {
         <SummaryCard label="Late Days" value={summary.lateDays} valueClassName="text-orange-600" />
       </div>
 
-      <div className="rounded-xl bg-white p-6 shadow-md">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="mb-4 text-lg font-semibold">Attendance History</h2>
 
         {loading ? (
           <div className="py-8 text-center text-sm text-gray-500">Loading attendance...</div>
         ) : (
-          <table className="w-full text-left">
-            <thead className="bg-gray-100 text-sm uppercase text-gray-600">
-              <tr>
-                <th className="px-6 py-3">Date</th>
-                <th className="px-6 py-3">Check In</th>
-                <th className="px-6 py-3">Lunch Start</th>
-                <th className="px-6 py-3">Lunch End</th>
-                <th className="px-6 py-3">Check Out</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Hours</th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y">
-              {filteredAttendanceData.length > 0 ? (
-                filteredAttendanceData.map((record) => (
-                  <tr key={record.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">{formatDate(record.date)}</td>
-                    <td className="px-6 py-4">{formatTime(record.check_in)}</td>
-                    <td className="px-6 py-4">{formatTime(record.lunch_start)}</td>
-                    <td className="px-6 py-4">{formatTime(record.lunch_end)}</td>
-                    <td className="px-6 py-4">{formatTime(record.check_out)}</td>
-                    <td className="px-6 py-4">
-                      <span className={`rounded-full px-3 py-1 text-sm font-medium ${getStatusStyle(record.status)}`}>
-                        {record.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">{record.work_hours ?? 0}</td>
-                  </tr>
-                ))
-              ) : (
+          <div className="overflow-x-auto thin-scrollbar">
+            <table className="min-w-[880px] w-full text-left">
+              <thead className="bg-gray-100 text-sm uppercase text-gray-600">
                 <tr>
-                  <td colSpan="7" className="px-6 py-8 text-center text-sm text-gray-500">
-                    No attendance records found.
-                  </td>
+                  <th className="px-6 py-3">Date</th>
+                  <th className="px-6 py-3">Check In</th>
+                  <th className="px-6 py-3">Lunch Start</th>
+                  <th className="px-6 py-3">Lunch End</th>
+                  <th className="px-6 py-3">Check Out</th>
+                  <th className="px-6 py-3">Status</th>
+                  <th className="px-6 py-3">Hours</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody className="divide-y">
+                {filteredAttendanceData.length > 0 ? (
+                  filteredAttendanceData.map((record) => (
+                    <tr key={record.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">{formatDate(record.date)}</td>
+                      <td className="px-6 py-4">{formatTime(record.check_in)}</td>
+                      <td className="px-6 py-4">{formatTime(record.lunch_start)}</td>
+                      <td className="px-6 py-4">{formatTime(record.lunch_end)}</td>
+                      <td className="px-6 py-4">{formatTime(record.check_out)}</td>
+                      <td className="px-6 py-4">
+                        <span className={`rounded-full px-3 py-1 text-sm font-medium ${getStatusStyle(record.status)}`}>
+                          {record.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">{record.work_hours ?? 0}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-8 text-center text-sm text-gray-500">
+                      No attendance records found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

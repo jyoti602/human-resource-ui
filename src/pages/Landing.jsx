@@ -22,23 +22,19 @@ export default function Landing() {
           </p>
 
           <div className="flex justify-center gap-6">
+            <Link
+              to="/register-company"
+              className="bg-white text-indigo-600 px-8 py-3 rounded-full font-semibold shadow-lg hover:scale-105 transition"
+            >
+              Start Free Setup
+            </Link>
 
-            {/* FEATURES PAGE LINK */}
             <Link
               to="/features"
-              className="bg-white text-indigo-600 px-8 py-3 rounded-full font-semibold shadow-lg hover:scale-105 transition"
+              className="border border-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-indigo-600 transition"
             >
               Explore Features
             </Link>
-
-            {/* ABOUT PAGE LINK */}
-            <Link
-              to="/about"
-              className="border border-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-indigo-600 transition"
-            >
-              Learn More
-            </Link>
-
           </div>
         </div>
 
@@ -113,10 +109,10 @@ export default function Landing() {
         </h3>
 
         <Link
-          to="/login"
+          to="/register-company"
           className="bg-white text-indigo-600 px-10 py-4 rounded-full font-semibold shadow-lg hover:scale-105 transition"
         >
-          Employee Login
+          Register Your Company
         </Link>
       </section>
 

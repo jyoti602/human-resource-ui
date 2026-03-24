@@ -62,13 +62,8 @@ export default function Payroll() {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-6">
-        Payroll Management
-      </h1>
-
-      {/* Search + Filter */}
-      <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
+    <div className="space-y-4 p-6">
+      <div className="flex justify-between items-center flex-wrap gap-4">
         <input
           type="text"
           placeholder="Search employee..."

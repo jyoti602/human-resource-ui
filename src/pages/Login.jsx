@@ -1,6 +1,6 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { authAPI } from "../services/api";
+import { authAPI, companyAPI, getTenantSlugFromHost } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import Topbar from "../components/Topbar";
 import Footer from "../components/Footer";
@@ -8,13 +8,44 @@ import Footer from "../components/Footer";
 export default function Login() {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
+  const detectedTenantSlug = getTenantSlugFromHost();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
+    companySlug: detectedTenantSlug,
     username: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [companyName, setCompanyName] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadCompany = async () => {
+      if (!detectedTenantSlug) {
+        setCompanyName("");
+        return;
+      }
+
+      try {
+        const company = await companyAPI.getCurrent();
+        if (!cancelled) {
+          setCompanyName(company.name || "");
+        }
+      } catch (requestError) {
+        if (!cancelled) {
+          setCompanyName("");
+        }
+      }
+    };
+
+    loadCompany();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [detectedTenantSlug]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -31,7 +62,7 @@ export default function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!formData.username || !formData.password) {
+    if (!formData.username || !formData.password || (!detectedTenantSlug && !formData.companySlug)) {
       setError("Please fill in all fields");
       return;
     }
@@ -48,10 +79,12 @@ export default function Login() {
       console.error("Login error:", requestError);
       const errorMessage = requestError.message || "Login failed";
 
-      if (errorMessage.includes("Incorrect username or password")) {
+      if (errorMessage.includes("Tenant context is required")) {
+        setError("Open the login page from your company URL or enter a company slug.");
+      } else if (errorMessage.includes("Incorrect username or password")) {
         setError("Invalid username or password");
       } else {
-        setError("Login failed. Please try again.");
+        setError(errorMessage || "Login failed. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -65,16 +98,41 @@ export default function Login() {
       <div className="flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-md">
           <h1 className="mb-2 text-center text-2xl font-bold text-gray-800">
-            Login to Your Account
+            {companyName ? `Login to ${companyName}` : "Login to Your Account"}
           </h1>
           <p className="mb-6 text-center text-sm text-gray-500">
-            Sign in to access your HRMS dashboard.
+            {companyName
+              ? `Sign in to access the ${companyName} workspace.`
+              : "Sign in to access your company HRMS workspace."}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
+              </div>
+            )}
+
+            {detectedTenantSlug ? (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                Signing in to workspace:{" "}
+                <span className="font-semibold">{companyName || detectedTenantSlug}</span>
+              </div>
+            ) : (
+              <div>
+                <label htmlFor="companySlug" className="mb-1 block text-sm text-gray-600">
+                  Company Slug
+                </label>
+                <input
+                  id="companySlug"
+                  type="text"
+                  name="companySlug"
+                  value={formData.companySlug}
+                  onChange={handleChange}
+                  placeholder="example: green-field-systems"
+                  className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-green-500"
+                  autoComplete="organization"
+                />
               </div>
             )}
 
@@ -129,10 +187,12 @@ export default function Login() {
           </form>
 
           <p className="mt-4 text-center text-sm text-gray-600">
-            Employee records are created by an administrator.
+            Employee accounts are created by your company administrator.
           </p>
           <p className="mt-2 text-center text-sm text-gray-500">
-            Use your assigned username, not email, to sign in.
+            {detectedTenantSlug
+              ? "Your company workspace was detected from the URL."
+              : "Use your company slug and assigned username to sign in."}
           </p>
         </div>
       </div>

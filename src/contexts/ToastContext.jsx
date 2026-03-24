@@ -1,26 +1,19 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useMemo } from "react";
+import { FiAlertCircle, FiCheckCircle, FiInfo, FiX } from "react-icons/fi";
+import { toast as notify, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ToastContext = createContext(null);
 
 export function ToastProvider({ children }) {
-  const [toasts, setToasts] = useState([]);
-
-  const removeToast = (id) => {
-    setToasts((current) => current.filter((toast) => toast.id !== id));
-  };
-
-  const showToast = (message, type = "info") => {
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    setToasts((current) => [...current, { id, message, type }]);
-    window.setTimeout(() => removeToast(id), 3500);
-  };
-
   const value = useMemo(
     () => ({
-      success: (message) => showToast(message, "success"),
-      error: (message) => showToast(message, "error"),
-      info: (message) => showToast(message, "info"),
-      removeToast,
+      success: (message, options = {}) => showCustomToast("success", message, options),
+      error: (message, options = {}) => showCustomToast("error", message, options),
+      info: (message, options = {}) => showCustomToast("info", message, options),
+      warning: (message, options = {}) => showCustomToast("warning", message, options),
+      dismiss: (id) => notify.dismiss(id),
+      promise: (promise, messages, options = {}) => notify.promise(promise, messages, options),
     }),
     []
   );
@@ -28,7 +21,22 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <ToastViewport toasts={toasts} onDismiss={removeToast} />
+      <ToastContainer
+        position="top-right"
+        autoClose={2800}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        closeButton={false}
+        toastClassName={() => "p-0"}
+        bodyClassName={() => "p-0"}
+        progressClassName={() => "bg-slate-900"}
+      />
     </ToastContext.Provider>
   );
 }
@@ -41,32 +49,74 @@ export function useToast() {
   return context;
 }
 
-function ToastViewport({ toasts, onDismiss }) {
-  return (
-    <div className="pointer-events-none fixed right-4 top-4 z-[100] flex w-full max-w-sm flex-col gap-3">
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className={`pointer-events-auto rounded-xl border px-4 py-3 shadow-lg backdrop-blur ${
-            toast.type === "success"
-              ? "border-green-200 bg-green-50 text-green-800"
-              : toast.type === "error"
-                ? "border-red-200 bg-red-50 text-red-800"
-                : "border-slate-200 bg-white text-slate-800"
-          }`}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <p className="text-sm font-medium">{toast.message}</p>
-            <button
-              type="button"
-              onClick={() => onDismiss(toast.id)}
-              className="text-xs font-semibold uppercase tracking-wide opacity-70 transition hover:opacity-100"
-            >
-              Close
-            </button>
-          </div>
+function showCustomToast(type, message, options) {
+  const iconMap = {
+    success: FiCheckCircle,
+    error: FiAlertCircle,
+    info: FiInfo,
+    warning: FiAlertCircle,
+  };
+
+  const toneMap = {
+    success: {
+      ring: "ring-emerald-200",
+      bg: "bg-emerald-50",
+      iconBg: "bg-emerald-100 text-emerald-700",
+      title: "Success",
+      progress: "bg-emerald-500",
+    },
+    error: {
+      ring: "ring-red-200",
+      bg: "bg-red-50",
+      iconBg: "bg-red-100 text-red-700",
+      title: "Error",
+      progress: "bg-red-500",
+    },
+    info: {
+      ring: "ring-blue-200",
+      bg: "bg-blue-50",
+      iconBg: "bg-blue-100 text-blue-700",
+      title: "Info",
+      progress: "bg-blue-500",
+    },
+    warning: {
+      ring: "ring-amber-200",
+      bg: "bg-amber-50",
+      iconBg: "bg-amber-100 text-amber-700",
+      title: "Warning",
+      progress: "bg-amber-500",
+    },
+  };
+
+  const tone = toneMap[type] || toneMap.info;
+  const Icon = iconMap[type] || FiInfo;
+
+  return notify(
+    ({ closeToast }) => (
+      <div className={`flex items-start gap-3 rounded-2xl p-4 ring-1 ${tone.ring} ${tone.bg}`}>
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${tone.iconBg}`}>
+          <Icon className="h-5 w-5" />
         </div>
-      ))}
-    </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-slate-900">{tone.title}</p>
+          <p className="mt-1 text-sm leading-5 text-slate-600">{String(message)}</p>
+        </div>
+        <button
+          type="button"
+          onClick={closeToast}
+          className="rounded-full p-1 text-slate-400 transition hover:bg-white/80 hover:text-slate-700"
+          aria-label="Close toast"
+        >
+          <FiX className="h-4 w-4" />
+        </button>
+      </div>
+    ),
+    {
+      ...options,
+      className: "shadow-none bg-transparent",
+      icon: false,
+      closeButton: false,
+      progressClassName: tone.progress,
+    }
   );
 }

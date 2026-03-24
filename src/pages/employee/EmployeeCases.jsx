@@ -104,16 +104,7 @@ export default function EmployeeCases() {
       </div>
     }>
       <div className="space-y-6 p-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-              My Cases & Requests
-            </h1>
-            <p className="text-gray-600 mt-1">
-              View and manage your leave requests, attendance issues, and other cases
-            </p>
-          </div>
+        <div className="flex justify-end">
           <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
             <FiPlus className="w-5 h-5" />
             <span>New Request</span>

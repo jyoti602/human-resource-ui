@@ -1,6 +1,14 @@
-export default function Card({ title, value, subtitle, trend, icon }) {
+export default function Card({ title, value, subtitle, trend, icon, children, className = "" }) {
+  if (children) {
+    return (
+      <div className={`rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md sm:p-5 ${className}`}>
+        {children}
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 hover:shadow-md transition-all duration-200">
+    <div className={`rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md sm:p-5 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-gray-500 text-xs sm:text-sm font-medium">{title}</h3>

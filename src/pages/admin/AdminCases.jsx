@@ -165,16 +165,7 @@ export default function AdminCases() {
       </div>
     }>
       <div className="space-y-6 p-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-              All Employee Cases & Requests
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Manage and review all employee cases, leave requests, and complaints
-            </p>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:justify-end sm:items-start gap-4">
           <div className="flex items-center space-x-2">
             <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
               <FiTrendingUp className="w-5 h-5" />

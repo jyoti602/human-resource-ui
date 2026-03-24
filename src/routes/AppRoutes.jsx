@@ -1,11 +1,13 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { AdminRoute, EmployeeRoute } from "../components/ProtectedRoute";
+import { getTenantSlugFromHost } from "../services/api";
 
 /* ================= PUBLIC PAGES ================= */
 import Landing from "../pages/Landing";
 import Features from "../pages/Features";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
+import CompanyRegister from "../pages/CompanyRegister";
 import Login from "../pages/Login";
 
 /* ================= LAYOUTS ================= */
@@ -20,6 +22,7 @@ import Employees from "../pages/admin/Employees";
 import Leaves from "../pages/admin/Leaves";
 import Payroll from "../pages/admin/Payroll";
 import Reports from "../pages/admin/Reports";
+import AdminProfile from "../pages/admin/Profile";
 
 /* ================= EMPLOYEE PAGES ================= */
 import EmployeeDashboard from "../pages/employee/EmployeeDashboard";
@@ -30,6 +33,8 @@ import Salary from "../pages/employee/Salary";
 import Profile from "../pages/employee/Profile";
 
 export default function AppRoutes() {
+  const isTenantWorkspace = Boolean(getTenantSlugFromHost());
+
   return (
     <BrowserRouter>
       <div className="bg-gray-100 min-h-screen">
@@ -37,10 +42,11 @@ export default function AppRoutes() {
 
           {/* ================= PUBLIC ================= */}
 
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={isTenantWorkspace ? <Navigate to="/login" replace /> : <Landing />} />
           <Route path="/features" element={<Features />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/register-company" element={<CompanyRegister />} />
           <Route path="/login" element={<Login />} />
           {/* ================= ADMIN ================= */}
 
@@ -60,6 +66,7 @@ export default function AppRoutes() {
             <Route path="leaves" element={<Leaves />} />
             <Route path="payroll" element={<Payroll />} />
             <Route path="reports" element={<Reports />} />
+            <Route path="profile" element={<AdminProfile />} />
 
           </Route>
 
