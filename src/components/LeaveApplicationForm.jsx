@@ -15,7 +15,7 @@ const LeaveApplicationForm = ({
 }) => {
   const toast = useToast();
   const [formData, setFormData] = useState({
-    employee_id: employeeId,
+    employee_id: employeeId ? String(employeeId) : "",
     leave_type: 'Casual',
     from_date: '',
     to_date: '',
@@ -38,7 +38,7 @@ const LeaveApplicationForm = ({
         setLeaveTypes(leaveTypeData);
         setFormData((prev) => ({
           ...prev,
-          employee_id: showEmployeeSelector ? prev.employee_id : employeeId,
+          employee_id: showEmployeeSelector ? String(prev.employee_id || "") : String(employeeId || ""),
           leave_type: leaveTypeData.some((item) => item.name === prev.leave_type)
             ? prev.leave_type
             : (leaveTypeData[0]?.name || ""),
@@ -120,17 +120,22 @@ const LeaveApplicationForm = ({
     setIsSubmitting(true);
 
     try {
-      const data = await leaveRequestAPI.create({
-        employee_id: formData.employee_id,
+      const payload = {
         leave_type: formData.leave_type,
         from_date: formData.from_date,
         to_date: formData.to_date,
         reason: formData.reason,
-      });
+      };
+
+      if (showEmployeeSelector) {
+        payload.employee_id = String(formData.employee_id || "");
+      }
+
+      const data = await leaveRequestAPI.create(payload);
       
       // Reset form
       setFormData({
-        employee_id: '',
+        employee_id: showEmployeeSelector ? '' : String(employeeId || ''),
         leave_type: 'Casual',
         from_date: '',
         to_date: '',

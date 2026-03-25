@@ -9,15 +9,28 @@ export default function Login() {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
   const detectedTenantSlug = getTenantSlugFromHost();
+  const tenantSlug = detectedTenantSlug || localStorage.getItem("tenant_slug") || "";
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    companySlug: detectedTenantSlug,
+    companySlug: tenantSlug,
     username: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const buildTenantUrl = (tenantSlug, path) => {
+    if (typeof window === "undefined" || !tenantSlug) {
+      return path;
+    }
+
+    const { protocol, port, hostname } = window.location;
+    const baseHost = hostname === "localhost" ? "localhost" : hostname.replace(/^[^.]+\./, "");
+    const tenantHost = `${tenantSlug}.${baseHost}`;
+    const portPart = port ? `:${port}` : "";
+
+    return `${protocol}//${tenantHost}${portPart}${path}`;
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -62,7 +75,9 @@ export default function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!formData.username || !formData.password || (!detectedTenantSlug && !formData.companySlug)) {
+    const effectiveTenantSlug = detectedTenantSlug || formData.companySlug || localStorage.getItem("tenant_slug") || "";
+
+    if (!effectiveTenantSlug || !formData.username || !formData.password) {
       setError("Please fill in all fields");
       return;
     }
@@ -71,16 +86,29 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await authAPI.login(formData);
+      const response = await authAPI.login({
+        username: formData.username,
+        password: formData.password,
+        companySlug: effectiveTenantSlug,
+      });
 
       authLogin(response);
-      navigate(response.role === "admin" ? "/admin/dashboard" : "/employee/dashboard");
+      const targetPath = response.role === "admin" ? "/admin/dashboard" : "/employee/dashboard";
+      const tenantSlug = response.tenant_slug || effectiveTenantSlug;
+      const targetUrl = buildTenantUrl(tenantSlug, targetPath);
+
+      if (typeof window !== "undefined" && targetUrl) {
+        window.location.assign(targetUrl);
+        return;
+      }
+
+      navigate(targetPath);
     } catch (requestError) {
       console.error("Login error:", requestError);
       const errorMessage = requestError.message || "Login failed";
 
       if (errorMessage.includes("Tenant context is required")) {
-        setError("Open the login page from your company URL or enter a company slug.");
+        setError("Please enter a valid company slug or open the login page from your company URL.");
       } else if (errorMessage.includes("Incorrect username or password")) {
         setError("Invalid username or password");
       } else {
@@ -113,12 +141,18 @@ export default function Login() {
               </div>
             )}
 
-            {detectedTenantSlug ? (
+            {tenantSlug ? (
               <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
                 Signing in to workspace:{" "}
-                <span className="font-semibold">{companyName || detectedTenantSlug}</span>
+                <span className="font-semibold">{companyName || tenantSlug}</span>
               </div>
             ) : (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                Enter your company slug to sign in.
+              </div>
+            )}
+
+            {!detectedTenantSlug && (
               <div>
                 <label htmlFor="companySlug" className="mb-1 block text-sm text-gray-600">
                   Company Slug

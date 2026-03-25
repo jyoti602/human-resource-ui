@@ -45,6 +45,7 @@ export default function Topbar({ onMenuToggle }) {
   const companyLabel = user?.company_name || detectedTenantSlug?.replace(/-/g, " ");
   const isTenantWorkspace = Boolean(detectedTenantSlug);
   const logoTarget = user ? dashboardPath : isTenantWorkspace ? "/login" : "/";
+  const showPublicNav = !user && !isTenantWorkspace;
 
   const handleLogout = () => {
     logout();
@@ -80,18 +81,27 @@ export default function Topbar({ onMenuToggle }) {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white shadow-md">
-      <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-10">
-        <Link to={logoTarget} className="flex items-center gap-3">
-          <img src={logo} alt="HRMS Logo" className="h-6 sm:h-8" />
+    <nav className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/90 shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+      <div className="mx-auto flex h-[76px] w-full max-w-[1400px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-10">
+        <Link to={logoTarget} className="flex items-center gap-3 transition-transform hover:scale-[1.01]">
+          <img src={logo} alt="HRMS Logo" className="h-7 sm:h-8" />
           {isTenantWorkspace && (
             <div className="hidden sm:block">
-              <p className="text-sm font-semibold capitalize text-gray-900">{companyLabel}</p>
+              <p className="text-sm font-semibold capitalize tracking-wide text-slate-900">{companyLabel}</p>
             </div>
           )}
         </Link>
 
-        <div className="ml-auto hidden items-center space-x-2 xl:space-x-4 lg:flex">
+        {showPublicNav && (
+          <div className="hidden items-center gap-1 rounded-full border border-slate-200 bg-white/90 px-2 py-1 shadow-sm lg:flex">
+            <NavLink to="/" label="Home" />
+            <NavLink to="/features" label="Features" />
+            <NavLink to="/about" label="About" />
+            <NavLink to="/contact" label="Contact" />
+          </div>
+        )}
+
+        <div className="ml-auto hidden items-center space-x-2 xl:space-x-3 lg:flex">
           {/* HR Assistant temporarily disabled
           <div className="relative">
             <button
@@ -155,14 +165,14 @@ export default function Topbar({ onMenuToggle }) {
             <>
               <Link
                 to={loginTarget}
-                className="rounded-md border border-green-600 px-3 py-2 text-sm font-medium text-green-600 transition-colors hover:bg-green-50 xl:px-4"
+                className="rounded-full border border-emerald-600 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-all hover:bg-emerald-50 hover:shadow-sm xl:px-5"
               >
                 Login
               </Link>
               {!isTenantWorkspace && (
                 <Link
                   to="/register-company"
-                  className="rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 xl:px-4"
+                  className="rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(16,185,129,0.25)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(16,185,129,0.32)] xl:px-5"
                 >
                   Register Company
                 </Link>
@@ -173,17 +183,17 @@ export default function Topbar({ onMenuToggle }) {
 
         <div className="ml-auto flex items-center space-x-2 lg:hidden">
           {!user && (
-            <div className="flex items-center gap-2 lg:hidden">
+            <div className="flex items-center gap-2">
               <Link
                 to={loginTarget}
-                className="rounded-md border border-green-600 px-3 py-2 text-sm font-medium text-green-600 transition-colors hover:bg-green-50"
+                className="rounded-full border border-emerald-600 px-3 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-50"
               >
                 Login
               </Link>
               {!isTenantWorkspace && (
                 <Link
                   to="/register-company"
-                  className="rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+                  className="rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-3 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(16,185,129,0.24)] transition-colors hover:opacity-95"
                 >
                   Register
                 </Link>
@@ -194,7 +204,7 @@ export default function Topbar({ onMenuToggle }) {
           {user && (
             <Link
               to={profilePath}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-green-600 text-sm font-semibold text-white lg:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(16,185,129,0.22)] lg:hidden"
             >
               {userInitial}
             </Link>
@@ -202,7 +212,7 @@ export default function Topbar({ onMenuToggle }) {
 
           {onMenuToggle && (
             <button
-              className="p-2 text-gray-700 transition-colors hover:text-green-600 lg:hidden"
+              className="rounded-full border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 lg:hidden"
               onClick={onMenuToggle}
               aria-label="Toggle sidebar"
             >
@@ -213,7 +223,7 @@ export default function Topbar({ onMenuToggle }) {
           )}
 
           <button
-            className="p-2 text-gray-700 transition-colors hover:text-green-600 lg:hidden"
+            className="rounded-full border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 lg:hidden"
             onClick={toggleMenu}
             aria-label="Toggle menu"
           >
@@ -441,5 +451,16 @@ export default function Topbar({ onMenuToggle }) {
       )}
       */}
     </nav>
+  );
+}
+
+function NavLink({ to, label }) {
+  return (
+    <Link
+      to={to}
+      className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-900 hover:text-white"
+    >
+      {label}
+    </Link>
   );
 }

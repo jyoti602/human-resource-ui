@@ -20,6 +20,14 @@ export const getTenantSlugFromHost = () => {
   return "";
 };
 
+export const getResolvedTenantSlug = () => {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  return localStorage.getItem("tenant_slug") || getTenantSlugFromHost();
+};
+
 // Generic API request function
 const apiRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -39,7 +47,7 @@ const apiRequest = async (endpoint, options = {}) => {
   delete config.isFormData;
 
   const token = localStorage.getItem('token');
-  const tenantSlug = localStorage.getItem('tenant_slug') || getTenantSlugFromHost();
+  const tenantSlug = getResolvedTenantSlug();
   if (token) {
     config.headers = {
       ...config.headers,
@@ -261,7 +269,7 @@ export const employeeRegistrationAPI = {
 // Authentication API functions
 export const authAPI = {
   login: async ({ companySlug, username, password }) => {
-    const resolvedTenantSlug = companySlug || getTenantSlugFromHost();
+    const resolvedTenantSlug = companySlug || getResolvedTenantSlug();
     return apiRequest('/auth/login', {
       method: 'POST',
       headers: {

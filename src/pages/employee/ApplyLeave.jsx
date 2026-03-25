@@ -189,7 +189,7 @@ export default function ApplyLeave() {
           onClose={() => setShowApplicationForm(false)}
           onSuccess={fetchLeaveData}
           showEmployeeSelector={false}
-          employeeId={currentEmployee?.id || ""}
+          employeeId={currentEmployee?.id ? String(currentEmployee.id) : ""}
           employeeLabel={currentEmployee?.name || currentEmployee?.full_name || "Current employee"}
           title="Leave Application Form"
           subtitle="Submit your leave request for approval."
