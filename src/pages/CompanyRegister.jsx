@@ -19,25 +19,11 @@ const initialForm = {
   confirm_password: "",
 };
 
-const buildTenantLoginUrl = (companySlug) => {
-  if (typeof window === "undefined") {
-    return `/login`;
-  }
-
-  const { protocol, port, hostname } = window.location;
-  const baseHost = hostname === "localhost" ? "localhost" : hostname.replace(/^[^.]+\./, "");
-  const tenantHost = `${companySlug}.${baseHost}`;
-  const portPart = port ? `:${port}` : "";
-
-  return `${protocol}//${tenantHost}${portPart}/login`;
-};
-
 export default function CompanyRegister() {
   const toast = useToast();
   const [formData, setFormData] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [createdWorkspace, setCreatedWorkspace] = useState(null);
-  const tenantLoginUrl = createdWorkspace ? buildTenantLoginUrl(createdWorkspace.company_slug) : "";
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -299,25 +285,13 @@ export default function CompanyRegister() {
                 <p>Company ID: <span className="font-semibold">{createdWorkspace.company_id}</span></p>
               </div>
               <div className="mt-6 flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    window.location.href = tenantLoginUrl;
-                  }}
+                <Link
+                  to="/login"
                   className="rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white transition hover:bg-emerald-700"
                 >
                   Go To Login
-                </button>
-                <a
-                  href={tenantLoginUrl}
-                  className="rounded-xl border border-emerald-300 px-5 py-3 font-semibold text-emerald-800 transition hover:bg-emerald-100"
-                >
-                  Open Company Workspace
-                </a>
+                </Link>
               </div>
-              <p className="mt-4 break-all text-sm text-slate-600">
-                Workspace URL: <span className="font-semibold">{tenantLoginUrl}</span>
-              </p>
             </div>
           ) : (
             <div className="rounded-[28px] bg-white p-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">

@@ -4,7 +4,11 @@ import { useAuth } from '../contexts/AuthContext';
 
 // Protected route component that checks authentication
 export const ProtectedRoute = ({ children, requiredRole = null, redirectTo = '/login' }) => {
-  const { isAuthenticated, isAdmin, isEmployee } = useAuth();
+  const { isAuthenticated, isAdmin, isEmployee, loading } = useAuth();
+
+  if (loading) {
+    return null;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to={redirectTo} replace />;

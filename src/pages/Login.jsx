@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authAPI, companyAPI, getTenantSlugFromHost } from "../services/api";
+import { authAPI } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import Topbar from "../components/Topbar";
 import Footer from "../components/Footer";
@@ -8,57 +8,14 @@ import Footer from "../components/Footer";
 export default function Login() {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
-  const detectedTenantSlug = getTenantSlugFromHost();
-  const tenantSlug = detectedTenantSlug || localStorage.getItem("tenant_slug") || "";
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    companySlug: tenantSlug,
+    companySlug: localStorage.getItem("tenant_slug") || "",
     username: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const buildTenantUrl = (tenantSlug, path) => {
-    if (typeof window === "undefined" || !tenantSlug) {
-      return path;
-    }
-
-    const { protocol, port, hostname } = window.location;
-    const baseHost = hostname === "localhost" ? "localhost" : hostname.replace(/^[^.]+\./, "");
-    const tenantHost = `${tenantSlug}.${baseHost}`;
-    const portPart = port ? `:${port}` : "";
-
-    return `${protocol}//${tenantHost}${portPart}${path}`;
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadCompany = async () => {
-      if (!detectedTenantSlug) {
-        setCompanyName("");
-        return;
-      }
-
-      try {
-        const company = await companyAPI.getCurrent();
-        if (!cancelled) {
-          setCompanyName(company.name || "");
-        }
-      } catch (requestError) {
-        if (!cancelled) {
-          setCompanyName("");
-        }
-      }
-    };
-
-    loadCompany();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [detectedTenantSlug]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -75,10 +32,10 @@ export default function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const effectiveTenantSlug = detectedTenantSlug || formData.companySlug || localStorage.getItem("tenant_slug") || "";
+    const effectiveTenantSlug = formData.companySlug.trim();
 
     if (!effectiveTenantSlug || !formData.username || !formData.password) {
-      setError("Please fill in all fields");
+      setError("Please enter your company slug, username, and password");
       return;
     }
 
@@ -94,21 +51,13 @@ export default function Login() {
 
       authLogin(response);
       const targetPath = response.role === "admin" ? "/admin/dashboard" : "/employee/dashboard";
-      const tenantSlug = response.tenant_slug || effectiveTenantSlug;
-      const targetUrl = buildTenantUrl(tenantSlug, targetPath);
-
-      if (typeof window !== "undefined" && targetUrl) {
-        window.location.assign(targetUrl);
-        return;
-      }
-
       navigate(targetPath);
     } catch (requestError) {
       console.error("Login error:", requestError);
       const errorMessage = requestError.message || "Login failed";
 
-      if (errorMessage.includes("Tenant context is required")) {
-        setError("Please enter a valid company slug or open the login page from your company URL.");
+      if (errorMessage.includes("Company workspace not found")) {
+        setError("Please enter a valid company slug.");
       } else if (errorMessage.includes("Incorrect username or password")) {
         setError("Invalid username or password");
       } else {
@@ -126,12 +75,10 @@ export default function Login() {
       <div className="flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-md">
           <h1 className="mb-2 text-center text-2xl font-bold text-gray-800">
-            {companyName ? `Login to ${companyName}` : "Login to Your Account"}
+            Login to Your Account
           </h1>
           <p className="mb-6 text-center text-sm text-gray-500">
-            {companyName
-              ? `Sign in to access the ${companyName} workspace.`
-              : "Sign in to access your company HRMS workspace."}
+            Sign in using your company slug, username, and password.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -141,34 +88,21 @@ export default function Login() {
               </div>
             )}
 
-            {tenantSlug ? (
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                Signing in to workspace:{" "}
-                <span className="font-semibold">{companyName || tenantSlug}</span>
-              </div>
-            ) : (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                Enter your company slug to sign in.
-              </div>
-            )}
-
-            {!detectedTenantSlug && (
-              <div>
-                <label htmlFor="companySlug" className="mb-1 block text-sm text-gray-600">
-                  Company Slug
-                </label>
-                <input
-                  id="companySlug"
-                  type="text"
-                  name="companySlug"
-                  value={formData.companySlug}
-                  onChange={handleChange}
-                  placeholder="example: green-field-systems"
-                  className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-green-500"
-                  autoComplete="organization"
-                />
-              </div>
-            )}
+            <div>
+              <label htmlFor="companySlug" className="mb-1 block text-sm text-gray-600">
+                Company Slug
+              </label>
+              <input
+                id="companySlug"
+                type="text"
+                name="companySlug"
+                value={formData.companySlug}
+                onChange={handleChange}
+                placeholder="example: it-technology"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-green-500"
+                autoComplete="organization"
+              />
+            </div>
 
             <div>
               <label htmlFor="username" className="mb-1 block text-sm text-gray-600">
@@ -224,9 +158,7 @@ export default function Login() {
             Employee accounts are created by your company administrator.
           </p>
           <p className="mt-2 text-center text-sm text-gray-500">
-            {detectedTenantSlug
-              ? "Your company workspace was detected from the URL."
-              : "Use your company slug and assigned username to sign in."}
+            Use your company slug and assigned username to sign in.
           </p>
         </div>
       </div>

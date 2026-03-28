@@ -25,7 +25,7 @@ export const getResolvedTenantSlug = () => {
     return "";
   }
 
-  return localStorage.getItem("tenant_slug") || getTenantSlugFromHost();
+  return localStorage.getItem("tenant_slug") || "";
 };
 
 // Generic API request function
@@ -269,17 +269,14 @@ export const employeeRegistrationAPI = {
 // Authentication API functions
 export const authAPI = {
   login: async ({ companySlug, username, password }) => {
-    const resolvedTenantSlug = companySlug || getResolvedTenantSlug();
     return apiRequest('/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        ...(resolvedTenantSlug ? { 'X-Tenant-Slug': resolvedTenantSlug } : {}),
-      },
-      body: new URLSearchParams({
+      headers: companySlug ? { "X-Tenant-Slug": companySlug } : {},
+      body: JSON.stringify({
         username,
         password,
-      }).toString(),
+        company_slug: companySlug || getResolvedTenantSlug(),
+      }),
     });
   },
 };

@@ -2,6 +2,27 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
+function getStoredUser() {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const storedUser = localStorage.getItem('user');
+  if (!storedUser) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(storedUser);
+  } catch (error) {
+    console.error('Error parsing stored user:', error);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('tenant_slug');
+    return null;
+  }
+}
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -11,23 +32,17 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => getStoredUser());
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Check for existing user session on mount
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-        localStorage.removeItem('user');
+    if (!user) {
+      const storedUser = getStoredUser();
+      if (storedUser) {
+        setUser(storedUser);
       }
     }
-    setLoading(false);
-  }, []);
+  }, [user]);
 
   const login = (userData) => {
     if (userData?.access_token) {
