@@ -13,7 +13,6 @@ import {
   FiHome,
 } from "react-icons/fi";
 import { useAuth } from "../contexts/AuthContext";
-import { getTenantSlugFromHost } from "../services/api";
 
 export default function Topbar({ onMenuToggle }) {
   const navigate = useNavigate();
@@ -41,17 +40,14 @@ export default function Topbar({ onMenuToggle }) {
   const loginTarget = !loading && user ? dashboardPath : "/login";
   const userName = user?.full_name || user?.name || "User";
   const userInitial = userName.charAt(0).toUpperCase();
-  const detectedTenantSlug = getTenantSlugFromHost();
-  const companyLabel = user?.company_name || detectedTenantSlug?.replace(/-/g, " ");
-  const isTenantWorkspace = Boolean(detectedTenantSlug);
-  const logoTarget = user ? dashboardPath : isTenantWorkspace ? "/login" : "/";
-  const showPublicNav = !user && !isTenantWorkspace;
+  const logoTarget = user ? dashboardPath : "/";
+  const showPublicNav = !user;
 
   const handleLogout = () => {
     logout();
     setMenuOpen(false);
     setProfileMenuOpen(false);
-    navigate(isTenantWorkspace ? "/login" : "/");
+    navigate("/");
   };
 
   const sendMessage = async () => {
@@ -85,11 +81,6 @@ export default function Topbar({ onMenuToggle }) {
       <div className="mx-auto flex h-[76px] w-full max-w-[1400px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-10">
         <Link to={logoTarget} className="flex items-center gap-3 transition-transform hover:scale-[1.01]">
           <img src={logo} alt="HRMS Logo" className="h-7 sm:h-8" />
-          {isTenantWorkspace && (
-            <div className="hidden sm:block">
-              <p className="text-sm font-semibold capitalize tracking-wide text-slate-900">{companyLabel}</p>
-            </div>
-          )}
         </Link>
 
         {showPublicNav && (
@@ -169,14 +160,12 @@ export default function Topbar({ onMenuToggle }) {
               >
                 Login
               </Link>
-              {!isTenantWorkspace && (
-                <Link
-                  to="/register-company"
-                  className="rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(16,185,129,0.25)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(16,185,129,0.32)] xl:px-5"
-                >
-                  Register Company
-                </Link>
-              )}
+              <Link
+                to="/register-company"
+                className="rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(16,185,129,0.25)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(16,185,129,0.32)] xl:px-5"
+              >
+                Register Company
+              </Link>
             </>
           )}
         </div>
@@ -190,14 +179,12 @@ export default function Topbar({ onMenuToggle }) {
               >
                 Login
               </Link>
-              {!isTenantWorkspace && (
-                <Link
-                  to="/register-company"
-                  className="rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-3 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(16,185,129,0.24)] transition-colors hover:opacity-95"
-                >
-                  Register
-                </Link>
-              )}
+              <Link
+                to="/register-company"
+                className="rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-3 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(16,185,129,0.24)] transition-colors hover:opacity-95"
+              >
+                Register
+              </Link>
             </div>
           )}
 
@@ -238,44 +225,38 @@ export default function Topbar({ onMenuToggle }) {
 
       {menuOpen && (
         <div className="max-h-96 space-y-3 overflow-y-auto border-t border-gray-200 bg-white px-3 py-4 sm:px-4 lg:hidden">
-          {!isTenantWorkspace && (
-            <div className="space-y-2">
-              <Link
-                to="/"
-                className="block rounded px-3 py-2 text-gray-700 transition-colors hover:bg-gray-50 hover:text-green-600"
-                onClick={toggleMenu}
-              >
-                Home
-              </Link>
-              <Link
-                to="/about"
-                className="block rounded px-3 py-2 text-gray-700 transition-colors hover:bg-gray-50 hover:text-green-600"
-                onClick={toggleMenu}
-              >
-                About
-              </Link>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Link
+              to="/"
+              className="block rounded px-3 py-2 text-gray-700 transition-colors hover:bg-gray-50 hover:text-green-600"
+              onClick={toggleMenu}
+            >
+              Home
+            </Link>
+            <Link
+              to="/about"
+              className="block rounded px-3 py-2 text-gray-700 transition-colors hover:bg-gray-50 hover:text-green-600"
+              onClick={toggleMenu}
+            >
+              About
+            </Link>
+          </div>
 
-          <div className={`space-y-2 ${isTenantWorkspace ? "" : "border-t border-gray-100 pt-3"}`}>
-            {!isTenantWorkspace && (
-              <>
-                <Link
-                  to="/features"
-                  className="block rounded px-3 py-2 text-gray-700 transition-colors hover:bg-gray-50 hover:text-green-600"
-                  onClick={toggleMenu}
-                >
-                  Features
-                </Link>
-                <Link
-                  to="/contact"
-                  className="block rounded px-3 py-2 text-gray-700 transition-colors hover:bg-gray-50 hover:text-green-600"
-                  onClick={toggleMenu}
-                >
-                  Contact
-                </Link>
-              </>
-            )}
+          <div className="space-y-2 border-t border-gray-100 pt-3">
+            <Link
+              to="/features"
+              className="block rounded px-3 py-2 text-gray-700 transition-colors hover:bg-gray-50 hover:text-green-600"
+              onClick={toggleMenu}
+            >
+              Features
+            </Link>
+            <Link
+              to="/contact"
+              className="block rounded px-3 py-2 text-gray-700 transition-colors hover:bg-gray-50 hover:text-green-600"
+              onClick={toggleMenu}
+            >
+              Contact
+            </Link>
           </div>
 
           <div className="space-y-2 border-t border-gray-200 pt-4">
@@ -318,15 +299,13 @@ export default function Topbar({ onMenuToggle }) {
                 >
                   Login
                 </Link>
-                {!isTenantWorkspace && (
-                  <Link
-                    to="/register-company"
-                    className="block w-full rounded-md bg-emerald-600 py-3 text-center font-medium text-white transition-colors hover:bg-emerald-700"
-                    onClick={toggleMenu}
-                  >
-                    Register Company
-                  </Link>
-                )}
+                <Link
+                  to="/register-company"
+                  className="block w-full rounded-md bg-emerald-600 py-3 text-center font-medium text-white transition-colors hover:bg-emerald-700"
+                  onClick={toggleMenu}
+                >
+                  Register Company
+                </Link>
               </>
             )}
           </div>

@@ -1,6 +1,6 @@
 // API Service for HRMS Backend
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 export const getTenantSlugFromHost = () => {
   if (typeof window === "undefined") {
@@ -10,11 +10,6 @@ export const getTenantSlugFromHost = () => {
   const host = window.location.hostname.toLowerCase();
   if (host.endsWith(".localhost")) {
     return host.slice(0, -".localhost".length);
-  }
-
-  const parts = host.split(".");
-  if (parts.length >= 3) {
-    return parts[0];
   }
 
   return "";

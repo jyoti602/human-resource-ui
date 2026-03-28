@@ -1,6 +1,5 @@
 import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { AdminRoute, EmployeeRoute } from "../components/ProtectedRoute";
-import { getTenantSlugFromHost } from "../services/api";
 
 /* ================= PUBLIC PAGES ================= */
 import Landing from "../pages/Landing";
@@ -33,8 +32,6 @@ import Salary from "../pages/employee/Salary";
 import Profile from "../pages/employee/Profile";
 
 export default function AppRoutes() {
-  const isTenantWorkspace = Boolean(getTenantSlugFromHost());
-
   return (
     <BrowserRouter>
       <div className="bg-gray-100 min-h-screen">
@@ -42,7 +39,7 @@ export default function AppRoutes() {
 
           {/* ================= PUBLIC ================= */}
 
-          <Route path="/" element={isTenantWorkspace ? <Navigate to="/login" replace /> : <Landing />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/features" element={<Features />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />

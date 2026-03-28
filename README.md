@@ -31,3 +31,13 @@ This system helps organizations manage employees, attendance, payroll, and leave
 ---
 
 ## Project Structure
+
+### Environment Variables
+
+This app uses Vite environment variables, so the frontend must define:
+
+```env
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+For Netlify, set `VITE_API_BASE_URL` to your deployed backend URL.
