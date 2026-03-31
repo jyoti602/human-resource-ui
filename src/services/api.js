@@ -20,9 +20,46 @@ export const getResolvedTenantSlug = () => {
     return "";
   }
 
-  return localStorage.getItem("tenant_slug") || "";
+  const storedTenantSlug = localStorage.getItem("tenant_slug") || "";
+  if (storedTenantSlug) {
+    return storedTenantSlug;
+  }
+
+  const storedUser = localStorage.getItem("user");
+  if (!storedUser) {
+    return "";
+  }
+
+  try {
+    const parsedUser = JSON.parse(storedUser);
+    return parsedUser?.tenant_slug || "";
+  } catch (error) {
+    return "";
+  }
 };
 
+const getStoredAuthToken = () => {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  const storedToken = localStorage.getItem("token") || "";
+  if (storedToken) {
+    return storedToken;
+  }
+
+  const storedUser = localStorage.getItem("user");
+  if (!storedUser) {
+    return "";
+  }
+
+  try {
+    const parsedUser = JSON.parse(storedUser);
+    return parsedUser?.access_token || "";
+  } catch (error) {
+    return "";
+  }
+};
 // Generic API request function
 const apiRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -41,7 +78,7 @@ const apiRequest = async (endpoint, options = {}) => {
   // Remove isFormData from config before passing to fetch
   delete config.isFormData;
 
-  const token = localStorage.getItem('token');
+  const token = getStoredAuthToken();
   const tenantSlug = getResolvedTenantSlug();
   if (token) {
     config.headers = {
@@ -61,6 +98,14 @@ const apiRequest = async (endpoint, options = {}) => {
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      if (response.status === 401 && typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("tenant_slug");
+        if (window.location.pathname !== "/login") {
+          window.location.assign("/login");
+        }
+      }
       throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
     }
     
@@ -298,3 +343,8 @@ export const handleApiError = (error) => {
     return error.message || 'An unexpected error occurred.';
   }
 };
+
+
+
+
+

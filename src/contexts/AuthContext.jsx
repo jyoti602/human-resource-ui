@@ -23,6 +23,14 @@ function getStoredUser() {
   }
 }
 
+function getStoredToken() {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  return localStorage.getItem('token') || '';
+}
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -42,6 +50,10 @@ export const AuthProvider = ({ children }) => {
         setUser(storedUser);
       }
     }
+
+    if (!getStoredToken() && user?.access_token) {
+      localStorage.setItem('token', user.access_token);
+    }
   }, [user]);
 
   const login = (userData) => {
@@ -51,8 +63,13 @@ export const AuthProvider = ({ children }) => {
     if (userData?.tenant_slug) {
       localStorage.setItem('tenant_slug', userData.tenant_slug);
     }
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+
+    const storedUser = userData?.access_token
+      ? { ...userData, access_token: userData.access_token }
+      : userData;
+
+    setUser(storedUser);
+    localStorage.setItem('user', JSON.stringify(storedUser));
   };
 
   const logout = () => {
@@ -77,7 +94,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     isAdmin,
     isEmployee,
-    isAuthenticated: !!user
+    isAuthenticated: !!user && !!getStoredToken(),
   };
 
   return (
