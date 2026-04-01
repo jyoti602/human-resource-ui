@@ -34,10 +34,14 @@ This system helps organizations manage employees, attendance, payroll, and leave
 
 ### Environment Variables
 
-This app uses Vite environment variables, so the frontend must define:
+This app uses Vite environment variables, but local development should rely on the Vite proxy:
 
 ```env
-VITE_API_BASE_URL=http://localhost:8000
+# Optional in dev. Set only for production or remote APIs.
+# VITE_API_BASE_URL=https://your-api.example.com
 ```
 
-For Netlify, set `VITE_API_BASE_URL` to your deployed backend URL.
+For Netlify or any production deployment, set `VITE_API_BASE_URL` to your deployed backend URL.
+
+When running locally, start the frontend with Vite and keep the backend on `http://localhost:8000`.
+The frontend will call same-origin paths such as `/employees/`, and Vite will proxy them to the backend.

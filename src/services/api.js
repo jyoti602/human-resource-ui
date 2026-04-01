@@ -1,6 +1,10 @@
 // API Service for HRMS Backend
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+// In dev, use same-origin requests so Vite can proxy to the backend and avoid CORS.
+// In production, fall back to the configured API base URL.
+const API_BASE_URL = import.meta.env.DEV
+  ? ""
+  : (import.meta.env.VITE_API_BASE_URL || "http://localhost:8000");
 
 export const getTenantSlugFromHost = () => {
   if (typeof window === "undefined") {
