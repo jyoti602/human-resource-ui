@@ -23,6 +23,35 @@ html {
   scroll-behavior: smooth;
 }
 
+@keyframes slide-right-to-left {
+  0% {
+    transform: translateX(18%);
+  }
+  100% {
+    transform: translateX(-18%);
+  }
+}
+
+.slide-right-to-left {
+  display: inline-block;
+  white-space: nowrap;
+  animation: slide-right-to-left 4s linear infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide-right-to-left {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .slide-right-to-left {
+    animation: none;
+    white-space: normal;
+    transform: none;
+  }
+}
+
 /* Reusable container */
 .container {
   @apply max-w-7xl mx-auto px-4;

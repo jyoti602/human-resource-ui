@@ -8,11 +8,11 @@ export default function Contact() {
       <Topbar />
 
       {/* HERO SECTION */}
-      <section className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white py-24 text-center">
+      <section className="bg-gradient-to-r from-slate-900 via-[#13352b] to-emerald-900 text-white py-24 text-center">
         <h1 className="text-5xl font-bold mb-6">
           Contact Us
         </h1>
-        <p className="max-w-2xl mx-auto text-lg opacity-90">
+        <p className="max-w-2xl mx-auto text-lg text-white/90">
           Have questions about HRMS? We'd love to hear from you.
         </p>
       </section>
@@ -31,7 +31,7 @@ export default function Contact() {
             <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
               <h4 className="font-semibold text-indigo-600 mb-2">📍 Address</h4>
               <p className="text-gray-600">
-                Shiamgir, Uttarakhand, India
+                Uttarakhand, India
               </p>
             </div>
 
@@ -53,49 +53,49 @@ export default function Contact() {
         </div>
 
         {/* RIGHT SIDE - CONTACT FORM */}
-        <div className="bg-white p-10 rounded-2xl shadow-lg">
-          <h3 className="text-2xl font-bold mb-6 text-gray-800">
+        <div className="bg-gradient-to-r from-slate-900 via-[#13352b] to-emerald-900 p-10 rounded-2xl shadow-lg text-white">
+          <h3 className="text-2xl font-bold mb-6">
             Send a Message
           </h3>
 
           <form className="space-y-6">
 
             <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
+              <label className="block mb-2 text-sm font-medium text-white/90">
                 Full Name
               </label>
               <input
                 type="text"
                 placeholder="Enter your name"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-3 border rounded-lg bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
 
             <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
+              <label className="block mb-2 text-sm font-medium text-white/90">
                 Email Address
               </label>
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-3 border rounded-lg bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
 
             <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
+              <label className="block mb-2 text-sm font-medium text-white/90">
                 Message
               </label>
               <textarea
                 rows="4"
                 placeholder="Write your message..."
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-3 border rounded-lg bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               ></textarea>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
+              className="w-full bg-emerald-700 text-white py-3 rounded-lg font-semibold hover:bg-emerald-800 transition"
             >
               Send Message
             </button>

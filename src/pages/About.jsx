@@ -8,11 +8,11 @@ export default function About() {
       <Topbar />
 
       {/* HERO SECTION */}
-      <section className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white py-24 text-center">
+      <section className="bg-gradient-to-r from-slate-900 via-[#13352b] to-emerald-900 text-white py-24 text-center">
         <h1 className="text-5xl font-bold mb-6">
           About HRMS
         </h1>
-        <p className="max-w-2xl mx-auto text-lg opacity-90">
+        <p className="max-w-2xl mx-auto text-lg text-white/90">
           Empowering organizations with modern HR technology to simplify workforce management.
         </p>
       </section>
